@@ -5,7 +5,7 @@
           <p>Gestiona el Estatuto, Plan de Trabajo y documentos normativos de la red.</p>
         </div>
         <button class="btn-primary" (click)="openUploadModal()">
-          ➕ Subir documento
+          <app-icon name="plus" [size]="18" /> Subir documento
         </button>
       </div>
 
@@ -53,7 +53,7 @@
         @for (doc of filteredDocuments(); track doc.id) {
           <div class="document-card" [class.inactive]="!doc.isActive">
             <div class="doc-icon">
-              {{ getDocIcon(doc.type) }}
+              <app-icon [name]="getDocIcon(doc.type)" [size]="32" />
             </div>
             <div class="doc-content">
               <h4>{{ doc.name }}</h4>
@@ -65,27 +65,31 @@
             </div>
             <div class="doc-actions">
               <div class="visibility-badge" [class.public]="doc.isPublic">
-                {{ doc.isPublic ? '🌐 Público' : '🔒 Privado' }}
+                @if (doc.isPublic) {
+                  <app-icon name="globe" [size]="14" /> Público
+                } @else {
+                  <app-icon name="lock" [size]="14" /> Privado
+                }
               </div>
               <div class="action-buttons">
                 <button class="action-btn" title="Descargar" (click)="downloadDocument(doc)">
-                  ⬇️
+                  <app-icon name="download" [size]="16" />
                 </button>
                 <button class="action-btn" title="Editar" (click)="editDocument(doc)">
-                  ✏️
+                  <app-icon name="edit" [size]="16" />
                 </button>
                 <button class="action-btn" title="Reemplazar" (click)="replaceDocument(doc)">
-                  🔄
+                  <app-icon name="refresh" [size]="16" />
                 </button>
                 <button class="action-btn delete" title="Eliminar" (click)="deleteDocument(doc)">
-                  🗑️
+                  <app-icon name="trash" [size]="16" />
                 </button>
               </div>
             </div>
           </div>
         } @empty {
           <div class="empty-state">
-            <span class="empty-icon">📁</span>
+            <span class="empty-icon"><app-icon name="folder" [size]="48" /></span>
             <h3>No hay documentos</h3>
             <p>Sube el primer documento normativo</p>
             <button class="btn-primary" (click)="openUploadModal()">
@@ -149,9 +153,9 @@
                       >
                       <label for="fileInput" class="file-label">
                         @if (selectedFile()) {
-                          <span>📄 {{ selectedFile()?.name }}</span>
+                          <span><app-icon name="file-text" [size]="16" /> {{ selectedFile()?.name }}</span>
                         } @else {
-                          <span>📁 Seleccionar archivo PDF</span>
+                          <span><app-icon name="folder-open" [size]="16" /> Seleccionar archivo PDF</span>
                         }
                       </label>
                     </div>

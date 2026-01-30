@@ -99,15 +99,15 @@ export class ExpertsComponent {
 
   getCountryFlag(country: string): string {
     const flags: Record<string, string> = {
-      'Perú': '🇵🇪',
-      'Chile': '🇨🇱',
-      'Colombia': '🇨🇴',
-      'Ecuador': '🇪🇨',
-      'México': '🇲🇽',
-      'España': '🇪🇸',
-      'Estados Unidos': '🇺🇸'
+      'Perú': 'PE',
+      'Chile': 'CL',
+      'Colombia': 'CO',
+      'Ecuador': 'EC',
+      'México': 'MX',
+      'España': 'ES',
+      'Estados Unidos': 'US'
     };
-    return flags[country] || '🌍';
+    return flags[country] || 'globe';
   }
 
   toggleVisibility(expert: Expert): void {

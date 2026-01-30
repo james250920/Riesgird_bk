@@ -94,7 +94,7 @@
                 <img [src]="event.bannerUrl" [alt]="event.title">
               } @else {
                 <div class="image-placeholder">
-                  <span>{{ getEventTypeIcon(event.type) }}</span>
+                  <app-icon [name]="getEventTypeIcon(event.type)" [size]="48" />
                 </div>
               }
               <span class="type-badge" [class]="event.type">

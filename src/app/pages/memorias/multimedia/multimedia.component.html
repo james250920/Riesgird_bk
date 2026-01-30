@@ -102,7 +102,7 @@
                   <img [src]="album.coverImageUrl" [alt]="album.title">
                 } @else {
                   <div class="cover-placeholder">
-                    <span>{{ getTypeIcon(album.type) }}</span>
+                    <app-icon [name]="getTypeIcon(album.type)" [size]="48" />
                   </div>
                 }
                 <div class="album-overlay">
@@ -180,7 +180,7 @@
                       @if (album.coverImageUrl) {
                         <img [src]="album.coverImageUrl" class="album-thumb">
                       } @else {
-                        <div class="thumb-placeholder">{{ getTypeIcon(album.type) }}</div>
+                        <div class="thumb-placeholder"><app-icon [name]="getTypeIcon(album.type)" [size]="24" /></div>
                       }
                       <span class="album-title">{{ album.title }}</span>
                     </div>

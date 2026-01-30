@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InstitutionalService } from '../../../services';
 import { NormativeDocument } from '../../../models';
+import { IconComponent } from '../../../shared';
 
 @Component({
   selector: 'app-normative-library',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './normative-library.component.html',
   styleUrl: './normative-library.component.scss'
 })
@@ -37,12 +38,12 @@ export class NormativeLibraryComponent {
 
   getDocIcon(type: string): string {
     const icons: Record<string, string> = {
-      'estatuto': '📜',
-      'plan_trabajo': '📋',
-      'reglamento': '📕',
-      'otro': '📄'
+      'estatuto': 'file-text',
+      'plan_trabajo': 'clipboard-list',
+      'reglamento': 'book',
+      'otro': 'file'
     };
-    return icons[type] || '📄';
+    return icons[type] || 'file';
   }
 
   formatFileSize(bytes: number): string {

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InstitutionalService } from '../../../services';
 import { InstitutionalContent } from '../../../models';
+import { IconComponent } from '../../../shared';
 
 @Component({
   selector: 'app-institutional-content',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './institutional-content.component.html',
   styleUrl: './institutional-content.component.scss'
 })

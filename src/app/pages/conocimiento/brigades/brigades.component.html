@@ -82,7 +82,7 @@
       <div class="brigade-card" [class]="brigade.status">
         <div class="brigade-header">
           <div class="brigade-icon">
-            {{ getBrigadeTypeIcon(brigade.type) }}
+            <app-icon [name]="getBrigadeTypeIcon(brigade.type)" [size]="32" />
           </div>
           <div class="brigade-title">
             <h4>{{ brigade.name }}</h4>

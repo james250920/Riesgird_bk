@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InstitutionalService } from '../../../services';
 import { Ally } from '../../../models';
+import { IconComponent } from '../../../shared';
 
 @Component({
   selector: 'app-allies-directory',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './allies-directory.component.html',
   styleUrl: './allies-directory.component.scss'
 })
@@ -38,10 +39,10 @@ export class AlliesDirectoryComponent {
 
   getTypeLabel(type: string): string {
     const labels: Record<string, string> = {
-      'cooperacion_internacional': '🌍 Cooperación Internacional',
-      'gobierno': '🏛️ Gobierno',
-      'colegio_profesional': '🎓 Colegio Profesional',
-      'institucion_privada': '🏢 Institución Privada',
+      'cooperacion_internacional': 'Cooperación Internacional',
+      'gobierno': 'Gobierno',
+      'colegio_profesional': 'Colegio Profesional',
+      'institucion_privada': 'Institución Privada',
       'otro': 'Otro'
     };
     return labels[type] || type;

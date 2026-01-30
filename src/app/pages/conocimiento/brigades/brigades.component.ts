@@ -76,13 +76,13 @@ export class BrigadesComponent {
 
   getBrigadeTypeIcon(type: string): string {
     const icons: Record<string, string> = {
-      emergencias: '🚨',
-      primeros_auxilios: '⛑️',
-      evacuacion: '🚪',
-      comunicaciones: '📡',
-      logistica: '📦'
+      emergencias: 'alert-circle',
+      primeros_auxilios: 'heart',
+      evacuacion: 'log-out',
+      comunicaciones: 'send',
+      logistica: 'archive'
     };
-    return icons[type] || '🎖️';
+    return icons[type] || 'shield';
   }
 
   getBrigadeTypeLabel(type: string): string {

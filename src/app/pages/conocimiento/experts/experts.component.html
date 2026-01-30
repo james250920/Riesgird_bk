@@ -92,7 +92,7 @@
         <div class="expert-info">
           <div class="expert-header">
             <h4>{{ expert.fullName }}</h4>
-            <span class="country-flag">{{ getCountryFlag(expert.country) }} {{ expert.country }}</span>
+            <span class="country-flag"><app-icon name="map-pin" [size]="14" /> {{ expert.country }}</span>
           </div>
 
           <p class="expert-title">{{ expert.title }}</p>

@@ -77,13 +77,13 @@ export class ProgramsComponent {
 
   getProgramTypeIcon(type: string): string {
     const icons: Record<string, string> = {
-      diplomado: '🎓',
-      especializacion: '📜',
-      maestria: '🏆',
-      curso: '📖',
-      taller: '🔧'
+      diplomado: 'graduation-cap',
+      especializacion: 'certificate',
+      maestria: 'award',
+      curso: 'book',
+      taller: 'settings'
     };
-    return icons[type] || '📚';
+    return icons[type] || 'book-open';
   }
 
   getProgramTypeLabel(type: string): string {

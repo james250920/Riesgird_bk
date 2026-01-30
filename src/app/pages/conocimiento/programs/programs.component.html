@@ -85,7 +85,7 @@
             <img [src]="program.imageUrl" [alt]="program.name">
           } @else {
             <div class="banner-placeholder">
-              <span>{{ getProgramTypeIcon(program.type) }}</span>
+              <app-icon [name]="getProgramTypeIcon(program.type)" [size]="48" />
             </div>
           }
           <div class="program-badges">

@@ -23,7 +23,7 @@
   <!-- Filters -->
   <div class="filters-bar">
     <div class="search-box">
-      <span class="search-icon">🔍</span>
+      <span class="search-icon"><app-icon name="search" [size]="18" /></span>
       <input
         type="text"
         placeholder="Buscar miembro..."
@@ -61,7 +61,7 @@
         <div class="team-sections">
           @if (getSecretariaTecnica(universityGroup.members).length > 0) {
             <div class="team-section">
-              <h4>📋 Secretaría Técnica</h4>
+              <h4><app-icon name="clipboard-list" [size]="20" /> Secretaría Técnica</h4>
               <div class="members-grid">
                 @for (member of getSecretariaTecnica(universityGroup.members); track member.id) {
                   <div class="member-card">
@@ -123,7 +123,7 @@
 
           @if (getGruposTrabajo(universityGroup.members).length > 0) {
             <div class="team-section">
-              <h4>⚙️ Grupos de Trabajo</h4>
+              <h4><app-icon name="settings" [size]="20" /> Grupos de Trabajo</h4>
               <div class="members-grid">
                 @for (member of getGruposTrabajo(universityGroup.members); track member.id) {
                   <div class="member-card">
@@ -166,7 +166,7 @@
   <!-- Summary Stats -->
   <div class="stats-grid">
     <div class="stat-card">
-      <span class="stat-icon">📋</span>
+      <span class="stat-icon"><app-icon name="clipboard-list" [size]="20" /></span>
       <div class="stat-info">
         <h4>{{ getStatCount('secretaria_tecnica') }}</h4>
         <p>Secretarías Técnicas</p>
@@ -180,7 +180,7 @@
       </div>
     </div>
     <div class="stat-card">
-      <span class="stat-icon">⚙️</span>
+      <span class="stat-icon"><app-icon name="settings" [size]="20" /></span>
       <div class="stat-info">
         <h4>{{ getStatCount('grupo_trabajo') }}</h4>
         <p>Grupos de Trabajo</p>

@@ -73,14 +73,14 @@ export class ForumEventsComponent {
 
   getEventTypeIcon(type: string): string {
     const icons: Record<string, string> = {
-      congreso: '🏛️',
-      seminario: '📚',
-      taller: '🔧',
-      conferencia: '🎤',
-      webinar: '💻',
-      reunion: '🤝'
+      congreso: 'landmark',
+      seminario: 'book-open',
+      taller: 'settings',
+      conferencia: 'users',
+      webinar: 'monitor',
+      reunion: 'handshake'
     };
-    return icons[type] || '📅';
+    return icons[type] || 'calendar';
   }
 
   getEventTypeLabel(type: string): string {

@@ -5,7 +5,7 @@
           <p>Gestiona los logos y enlaces de socios estratégicos de la red.</p>
         </div>
         <button class="btn-primary" (click)="openModal()">
-          ➕ Agregar aliado
+          <app-icon name="plus" [size]="18" /> Agregar aliado
         </button>
       </div>
 
@@ -23,28 +23,28 @@
           [class.active]="filterType() === 'cooperacion_internacional'"
           (click)="filterType.set('cooperacion_internacional')"
         >
-          🌍 Cooperación Internacional
+          <app-icon name="globe" [size]="16" /> Cooperación Internacional
         </button>
         <button
           class="filter-btn"
           [class.active]="filterType() === 'gobierno'"
           (click)="filterType.set('gobierno')"
         >
-          🏛️ Gobierno
+          <app-icon name="landmark" [size]="16" /> Gobierno
         </button>
         <button
           class="filter-btn"
           [class.active]="filterType() === 'colegio_profesional'"
           (click)="filterType.set('colegio_profesional')"
         >
-          🎓 Colegios Profesionales
+          <app-icon name="graduation-cap" [size]="16" /> Colegios Profesionales
         </button>
         <button
           class="filter-btn"
           [class.active]="filterType() === 'institucion_privada'"
           (click)="filterType.set('institucion_privada')"
         >
-          🏢 Instituciones Privadas
+          <app-icon name="office" [size]="16" /> Instituciones Privadas
         </button>
       </div>
 
@@ -68,12 +68,12 @@
               <div class="ally-contact">
                 @if (ally.contactEmail) {
                   <a [href]="'mailto:' + ally.contactEmail" class="contact-link">
-                    📧 {{ ally.contactEmail }}
+                    <app-icon name="mail" [size]="14" /> {{ ally.contactEmail }}
                   </a>
                 }
                 @if (ally.websiteUrl) {
                   <a [href]="ally.websiteUrl" target="_blank" class="contact-link">
-                    🔗 Sitio web
+                    <app-icon name="link" [size]="14" /> Sitio web
                   </a>
                 }
               </div>
@@ -91,17 +91,17 @@
               </div>
               <div class="action-buttons">
                 <button class="action-btn" title="Editar" (click)="editAlly(ally)">
-                  ✏️
+                  <app-icon name="edit" [size]="16" />
                 </button>
                 <button class="action-btn delete" title="Eliminar" (click)="deleteAlly(ally)">
-                  🗑️
+                  <app-icon name="trash" [size]="16" />
                 </button>
               </div>
             </div>
           </div>
         } @empty {
           <div class="empty-state">
-            <span class="empty-icon">🤝</span>
+            <span class="empty-icon"><app-icon name="handshake" [size]="48" /></span>
             <h3>No hay aliados registrados</h3>
             <p>Agrega el primer aliado estratégico</p>
             <button class="btn-primary" (click)="openModal()">
@@ -157,7 +157,11 @@
                       hidden
                     >
                     <label for="logoInput" class="upload-btn">
-                      {{ previewLogo() ? '🔄 Cambiar logo' : '📷 Subir logo' }}
+                      @if (previewLogo()) {
+                        <app-icon name="refresh" [size]="16" /> Cambiar logo
+                      } @else {
+                        <app-icon name="camera" [size]="16" /> Subir logo
+                      }
                     </label>
                   </div>
                 </div>

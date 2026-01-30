@@ -12,7 +12,7 @@
   <!-- Search and Filters -->
   <div class="filters-bar">
     <div class="search-box">
-      <span class="search-icon">🔍</span>
+      <span class="search-icon"><app-icon name="search" [size]="18" /></span>
       <input
         type="text"
         placeholder="Buscar universidad..."
@@ -42,14 +42,14 @@
         [class.active]="viewMode() === 'grid'"
         (click)="viewMode.set('grid')"
       >
-        ⊞
+        <app-icon name="grid" [size]="18" />
       </button>
       <button
         class="view-btn"
         [class.active]="viewMode() === 'list'"
         (click)="viewMode.set('list')"
       >
-        ☰
+        <app-icon name="list" [size]="18" />
       </button>
     </div>
   </div>
@@ -82,10 +82,10 @@
               {{ getStatusLabel(university.membershipStatus) }}
             </span>
           </div>
-          <p class="university-location">📍 {{ university.city }}, {{ university.region }}</p>
+          <p class="university-location"><app-icon name="map-pin" [size]="14" /> {{ university.city }}, {{ university.region }}</p>
           <div class="university-meta">
             @if (university.membershipDate) {
-              <span>🎫 Miembro desde {{ formatDate(university.membershipDate) }}</span>
+              <span><app-icon name="ticket" [size]="14" /> Miembro desde {{ formatDate(university.membershipDate) }}</span>
             }
             <span><app-icon name="users" [size]="16" /> {{ university.authorities.length }} autoridades</span>
             <span><app-icon name="folder" [size]="16" /> {{ university.reports.length }} reportes</span>
@@ -111,7 +111,7 @@
               <app-icon name="edit" [size]="16" />
             </button>
             <button class="action-btn" title="Autoridades" (click)="manageAuthorities(university)">
-              👔
+              <app-icon name="tie" [size]="16" />
             </button>
             <button class="action-btn delete" title="Eliminar" (click)="deleteUniversity(university)">
               <app-icon name="trash" [size]="16" />

@@ -83,11 +83,11 @@ export class MultimediaComponent {
 
   getTypeIcon(type?: string): string {
     const icons: Record<string, string> = {
-      fotos: '📸',
-      videos: '🎬',
-      mixto: '📁'
+      fotos: 'camera',
+      videos: 'video',
+      mixto: 'folder'
     };
-    return icons[type || 'fotos'] || '📁';
+    return icons[type || 'fotos'] || 'folder';
   }
 
   getTypeLabel(type?: string): string {

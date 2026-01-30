@@ -554,6 +554,48 @@
       <polyline points="14 2 14 8 20 8"/>
       <circle cx="12" cy="15" r="3"/>
     }
+    @case ('handshake') {
+      <path d="M11 17a4 4 0 0 0 4-4V5"/>
+      <path d="m2 9 5-5 4 4 5-5 5 5"/>
+      <path d="M2 9v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9"/>
+      <path d="M9 12h6"/>
+    }
+    @case ('tie') {
+      <path d="M12 3l3 6-3 12-3-12 3-6z"/>
+      <path d="M9 9h6"/>
+    }
+    @case ('save') {
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+      <polyline points="17 21 17 13 7 13 7 21"/>
+      <polyline points="7 3 7 8 15 8"/>
+    }
+    @case ('landmark') {
+      <line x1="3" y1="22" x2="21" y2="22"/>
+      <line x1="6" y1="18" x2="6" y2="11"/>
+      <line x1="10" y1="18" x2="10" y2="11"/>
+      <line x1="14" y1="18" x2="14" y2="11"/>
+      <line x1="18" y1="18" x2="18" y2="11"/>
+      <polygon points="12 2 20 7 4 7"/>
+    }
+    @case ('office') {
+      <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+      <path d="M9 22v-4h6v4"/>
+      <path d="M8 6h.01"/>
+      <path d="M16 6h.01"/>
+      <path d="M12 6h.01"/>
+      <path d="M8 10h.01"/>
+      <path d="M16 10h.01"/>
+      <path d="M12 10h.01"/>
+      <path d="M8 14h.01"/>
+      <path d="M16 14h.01"/>
+      <path d="M12 14h.01"/>
+    }
+    @case ('ticket') {
+      <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+      <path d="M13 5v2"/>
+      <path d="M13 17v2"/>
+      <path d="M13 11v2"/>
+    }
     @default {
       <circle cx="12" cy="12" r="10"/>
     }
