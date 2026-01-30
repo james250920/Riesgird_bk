@@ -7,7 +7,7 @@
   </div>
 
   <div class="roles-grid">
-    @for (role of roles; track role.id) {
+    @for (role of roles(); track role.id) {
       <div class="role-card">
         <div class="role-icon" [style.background]="role.color">
           <app-icon name="shield" [size]="32" />
@@ -16,7 +16,7 @@
           <h4>{{ role.name }}</h4>
           <p class="role-level">{{ role.level }}</p>
         </div>
-        <button class="btn-edit">
+        <button class="btn-edit" (click)="configureRole(role)">
           <app-icon name="settings" [size]="18" /> Configurar
         </button>
       </div>

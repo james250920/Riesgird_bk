@@ -4,7 +4,7 @@
       <h2>Gestión de Usuarios</h2>
       <p>Administra los usuarios y sus roles en el sistema.</p>
     </div>
-    <button class="btn-primary">
+    <button class="btn-primary" (click)="openModal()">
       <app-icon name="plus" [size]="18" /> Nuevo Usuario
     </button>
   </div>
@@ -15,8 +15,7 @@
         <div class="user-avatar">
           {{
             (
-              (((user.fullName?.trim() ?? '').split(' ')[0]?.[0] ?? '') +
-               ((user.fullName?.trim() ?? '').split(' ')[1]?.[0] ?? ((user.fullName?.trim() ?? '').split(' ')[0]?.[1] ?? '')))
+              (((user.fullName?.trim() ?? '').split(' ')[0]?.[0] ?? '') +((user.fullName?.trim() ?? '').split(' ')[1]?.[0] ?? ((user.fullName?.trim() ?? '').split(' ')[0]?.[1] ?? '')))
             ).toUpperCase()
           }}
         </div>
@@ -31,10 +30,10 @@
           </span>
         </div>
         <div class="user-actions">
-          <button class="action-btn" title="Editar">
+          <button class="action-btn" title="Editar" (click)="editUser(user)">
             <app-icon name="edit" [size]="18" />
           </button>
-          <button class="action-btn" title="Eliminar">
+          <button class="action-btn" title="Eliminar" (click)="deleteUser(user)">
             <app-icon name="trash" [size]="18" />
           </button>
         </div>

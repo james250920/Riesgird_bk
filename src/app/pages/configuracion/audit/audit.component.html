@@ -4,10 +4,52 @@
       <h2>Auditoría del Sistema</h2>
       <p>Registro de acciones y cambios en el sistema.</p>
     </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="clearFilters()">
+        <app-icon name="filter" [size]="18" /> Limpiar Filtros
+      </button>
+      <button class="btn-primary" (click)="exportLogs()">
+        <app-icon name="download" [size]="18" /> Exportar
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-section">
+    <div class="filter-group">
+      <label>Módulo:</label>
+      <select [(ngModel)]="selectedModule">
+        <option value="all">Todos</option>
+        <option value="usuarios">Usuarios</option>
+        <option value="universidades">Universidades</option>
+        <option value="membresia">Membresía</option>
+        <option value="gobernanza">Gobernanza</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Acción:</label>
+      <select [(ngModel)]="selectedAction">
+        <option value="all">Todas</option>
+        <option value="create">Crear</option>
+        <option value="update">Actualizar</option>
+        <option value="delete">Eliminar</option>
+        <option value="login">Login</option>
+        <option value="logout">Logout</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Buscar:</label>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Buscar en logs..."
+      />
+    </div>
   </div>
 
   <div class="audit-list">
-    @for (log of authService.auditLogs(); track log.id) {
+    @for (log of filteredLogs(); track log.id) {
       <div class="audit-entry">
         <div class="audit-icon">
           <app-icon name="activity" [size]="20" />
