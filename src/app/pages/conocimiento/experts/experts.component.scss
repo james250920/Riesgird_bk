@@ -332,7 +332,156 @@
   cursor: pointer;
 }
 
-@media (max-width: 768px) {
+/* Responsive Styles */
+@media (max-width: 1024px) {
   .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+
+  .stat-card {
+    padding: 0.75rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .stat-icon { font-size: 1.25rem; }
+  .stat-info h4 { font-size: 1.25rem; }
+
+  .filters-bar {
+    flex-direction: column;
+  }
+
+  .search-box {
+    min-width: 100%;
+  }
+
+  .filter-group {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .filter-group select {
+    flex: 1;
+    min-width: 45%;
+  }
+
   .expert-card { flex-direction: column; }
+
+  .expert-photo {
+    align-self: center;
+  }
+
+  .expert-info {
+    text-align: center;
+  }
+
+  .expert-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .specialties {
+    justify-content: center;
+  }
+
+  .expert-contact {
+    align-items: center;
+  }
+
+  .contact-links {
+    justify-content: center;
+  }
+
+  .expert-actions {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  /* Modal responsive */
+  .modal {
+    width: 95%;
+    max-height: 85vh;
+  }
+
+  .modal-body {
+    padding: 1rem;
+    max-height: calc(85vh - 60px);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .checkbox-group {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+
+  .empty-state {
+    padding: 2rem 1rem;
+  }
+
+  .empty-icon {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content h2 {
+    font-size: 1.25rem;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-group select {
+    min-width: 100%;
+  }
+
+  .expert-header h4 {
+    font-size: 1rem;
+  }
+
+  .expert-photo img,
+  .photo-placeholder {
+    width: 64px;
+    height: 64px;
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .contact-btn {
+    width: 36px;
+    height: 36px;
+  }
 }

@@ -353,3 +353,125 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
+    /* Responsive Styles */
+    @media (max-width: 1024px) {
+      .allies-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .btn-primary {
+        width: 100%;
+        text-align: center;
+      }
+
+      .filters {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .filter-btn {
+        flex-shrink: 0;
+      }
+
+      .allies-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .ally-card {
+        flex-direction: column;
+      }
+
+      .ally-logo {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto;
+      }
+
+      .ally-info {
+        text-align: center;
+      }
+
+      .ally-type {
+        margin: 0.5rem auto;
+      }
+
+      .ally-contact {
+        align-items: center;
+      }
+
+      .ally-actions {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e2e8f0;
+        margin-top: 0.5rem;
+      }
+
+      /* Modal responsive */
+      .modal {
+        width: 95%;
+        max-height: 85vh;
+      }
+
+      .modal-body {
+        padding: 1rem;
+        max-height: calc(85vh - 60px);
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .checkbox-group {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .form-actions button {
+        width: 100%;
+      }
+
+      .empty-state {
+        padding: 2rem 1rem;
+      }
+
+      .empty-icon {
+        font-size: 2rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-content h2 {
+        font-size: 1.25rem;
+      }
+
+      .ally-info h4 {
+        font-size: 0.95rem;
+      }
+
+      .action-btn {
+        width: 28px;
+        height: 28px;
+      }
+
+      .logo-upload {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }

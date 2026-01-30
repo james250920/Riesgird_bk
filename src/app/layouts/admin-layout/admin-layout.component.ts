@@ -23,6 +23,7 @@ export class AdminLayoutComponent {
   authService = inject(AuthService);
 
   sidebarCollapsed = signal(false);
+  mobileMenuOpen = signal(false);
   pageTitle = signal('Dashboard');
   breadcrumbs = signal<string[]>([]);
   showPublicContent = signal(false);
@@ -106,6 +107,14 @@ export class AdminLayoutComponent {
 
   toggleSidebar(): void {
     this.sidebarCollapsed.update(v => !v);
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen.update(v => !v);
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
   }
 
   togglePublicContent(): void {

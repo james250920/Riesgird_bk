@@ -1,6 +1,13 @@
 <div class="admin-layout">
+  <!-- Mobile Overlay -->
+  <div
+    class="sidebar-overlay"
+    [class.active]="mobileMenuOpen()"
+    (click)="closeMobileMenu()"
+  ></div>
+
   <!-- Sidebar -->
-  <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed()" [class.mobile-open]="mobileMenuOpen()">
     <div class="sidebar-header">
       <div class="logo">
         @if (!sidebarCollapsed()) {
@@ -26,6 +33,7 @@
             routerLinkActive="active"
             class="nav-item"
             [title]="sidebarCollapsed() ? item.label : ''"
+            (click)="closeMobileMenu()"
           >
             <span class="nav-icon"><app-icon [name]="item.icon" [size]="20" /></span>
             @if (!sidebarCollapsed()) {
@@ -39,6 +47,7 @@
                   [routerLink]="child.route"
                   routerLinkActive="active"
                   class="nav-child-item"
+                  (click)="closeMobileMenu()"
                 >
                   <span class="nav-icon"><app-icon [name]="child.icon" [size]="18" /></span>
                   <span class="nav-label">{{ child.label }}</span>
@@ -72,9 +81,14 @@
   <!-- Main Content -->
   <main class="main-content">
     <header class="main-header">
+      <!-- Mobile menu button -->
+      <button class="mobile-menu-btn show-tablet" (click)="toggleMobileMenu()">
+        <app-icon name="menu" [size]="20" />
+      </button>
+
       <div class="header-left">
         <h1 class="page-title">{{ pageTitle() }}</h1>
-        <nav class="breadcrumb">
+        <nav class="breadcrumb hide-mobile">
           <span>Panel de Control</span>
           @if (breadcrumbs().length > 0) {
             @for (crumb of breadcrumbs(); track crumb) {
@@ -85,14 +99,14 @@
         </nav>
       </div>
       <div class="header-right">
-        <div class="visibility-toggle">
+        <div class="visibility-toggle hide-mobile">
           <label class="toggle-label">
             <input type="checkbox" [checked]="showPublicContent()" (change)="togglePublicContent()">
             <span class="toggle-text">Vista pública</span>
           </label>
         </div>
         <button class="header-btn" title="Notificaciones"><app-icon name="bell" [size]="20" /></button>
-        <button class="header-btn" title="Configuración"><app-icon name="settings" [size]="20" /></button>
+        <button class="header-btn hide-mobile" title="Configuración"><app-icon name="settings" [size]="20" /></button>
       </div>
     </header>
 

@@ -484,3 +484,146 @@
   border-radius: 8px;
   cursor: pointer;
 }
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .reports-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .filters-bar {
+    flex-direction: column;
+  }
+
+  .search-box {
+    min-width: 100%;
+  }
+
+  .filter-group {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .filter-group select {
+    flex: 1;
+    min-width: 45%;
+  }
+
+  .summary-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .summary-card {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .summary-icon {
+    font-size: 1.25rem;
+  }
+
+  .summary-info h4 {
+    font-size: 1.5rem;
+  }
+
+  .year-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .report-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .actions {
+    justify-content: center;
+  }
+
+  /* Modal responsive */
+  .modal {
+    width: 95%;
+    max-height: 85vh;
+  }
+
+  .modal-body {
+    padding: 1rem;
+    max-height: calc(85vh - 60px);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .checkbox-group {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content h2 {
+    font-size: 1.25rem;
+  }
+
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .year-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .report-content h4 {
+    font-size: 0.95rem;
+  }
+
+  .filter-group select {
+    min-width: 100%;
+  }
+
+  .action-btn {
+    width: 28px;
+    height: 28px;
+  }
+}

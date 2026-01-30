@@ -458,3 +458,153 @@
   border-radius: 8px;
   cursor: pointer;
 }
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .universities-container.grid-view {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+
+  .filter-group {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .filters-bar {
+    flex-direction: column;
+  }
+
+  .search-box {
+    min-width: 100%;
+  }
+
+  .filter-group {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .filter-group select {
+    flex: 1;
+    min-width: 45%;
+  }
+
+  .view-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stats-summary {
+    flex-direction: column;
+  }
+
+  .stat-item {
+    width: 100%;
+  }
+
+  .universities-container.grid-view {
+    grid-template-columns: 1fr;
+  }
+
+  .university-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .university-logo {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto;
+  }
+
+  .university-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .university-header h4 {
+    font-size: 0.95rem;
+  }
+
+  .university-actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 0.5rem;
+  }
+
+  /* Modal responsive */
+  .modal {
+    width: 95%;
+    max-height: 85vh;
+  }
+
+  .modal-body {
+    padding: 1rem;
+    max-height: calc(85vh - 60px);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .checkbox-group {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content h2 {
+    font-size: 1.25rem;
+  }
+
+  .stat-count {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+
+  .university-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .action-buttons {
+    gap: 0.375rem;
+  }
+
+  .action-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .filter-group select {
+    min-width: 100%;
+  }
+}
