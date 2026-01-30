@@ -1,0 +1,289 @@
+<div class="universities-list">
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Directorio de Universidades</h2>
+      <p>Gestiona las universidades miembros de la red.</p>
+    </div>
+    <button class="btn-primary" (click)="openModal()">
+      <app-icon name="plus" [size]="18" /> Nueva Universidad
+    </button>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Buscar universidad..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearch()"
+      >
+    </div>
+    <div class="filter-group">
+      <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+        <option value="all">Todos los estados</option>
+        <option value="activo">Activo</option>
+        <option value="en_proceso">En proceso</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="suspendido">Suspendido</option>
+        <option value="inactivo">Inactivo</option>
+      </select>
+      <select [(ngModel)]="regionFilter" (change)="applyFilters()">
+        <option value="all">Todas las regiones</option>
+        @for (region of regions(); track region) {
+          <option [value]="region">{{ region }}</option>
+        }
+      </select>
+    </div>
+    <div class="view-toggle">
+      <button
+        class="view-btn"
+        [class.active]="viewMode() === 'grid'"
+        (click)="viewMode.set('grid')"
+      >
+        ⊞
+      </button>
+      <button
+        class="view-btn"
+        [class.active]="viewMode() === 'list'"
+        (click)="viewMode.set('list')"
+      >
+        ☰
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Summary -->
+  <div class="stats-summary">
+    @for (stat of statusStats(); track stat.status) {
+      <div class="stat-item" [style.border-color]="stat.color">
+        <span class="stat-count">{{ stat.count }}</span>
+        <span class="stat-label">{{ stat.label }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Universities Grid/List -->
+  <div class="universities-container" [class.grid-view]="viewMode() === 'grid'">
+    @for (university of filteredUniversities(); track university.id) {
+      <div class="university-card">
+        <div class="university-logo">
+          @if (university.logoUrl) {
+            <img [src]="university.logoUrl" [alt]="university.shortName">
+          } @else {
+            <span class="logo-placeholder">{{ university.shortName }}</span>
+          }
+        </div>
+        <div class="university-info">
+          <div class="university-header">
+            <h4>{{ university.name }}</h4>
+            <span class="status-badge" [class]="university.membershipStatus">
+              {{ getStatusLabel(university.membershipStatus) }}
+            </span>
+          </div>
+          <p class="university-location">📍 {{ university.city }}, {{ university.region }}</p>
+          <div class="university-meta">
+            @if (university.membershipDate) {
+              <span>🎫 Miembro desde {{ formatDate(university.membershipDate) }}</span>
+            }
+            <span><app-icon name="users" [size]="16" /> {{ university.authorities.length }} autoridades</span>
+            <span><app-icon name="folder" [size]="16" /> {{ university.reports.length }} reportes</span>
+          </div>
+        </div>
+        <div class="university-actions">
+          <div class="visibility-toggle">
+            <label class="switch">
+              <input
+                type="checkbox"
+                [checked]="university.isPublic"
+                (change)="toggleVisibility(university)"
+              >
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-label">{{ university.isPublic ? 'Público' : 'Privado' }}</span>
+          </div>
+          <div class="action-buttons">
+            <a [routerLink]="['/admin/universidades', university.id]" class="action-btn" title="Ver detalles">
+              <app-icon name="eye" [size]="16" />
+            </a>
+            <button class="action-btn" title="Editar" (click)="editUniversity(university)">
+              <app-icon name="edit" [size]="16" />
+            </button>
+            <button class="action-btn" title="Autoridades" (click)="manageAuthorities(university)">
+              👔
+            </button>
+            <button class="action-btn delete" title="Eliminar" (click)="deleteUniversity(university)">
+              <app-icon name="trash" [size]="16" />
+            </button>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <span class="empty-icon"><app-icon name="university" [size]="48" /></span>
+        <h3>No se encontraron universidades</h3>
+        <p>{{ searchQuery ? 'Intenta con otra búsqueda' : 'Registra la primera universidad' }}</p>
+        @if (!searchQuery) {
+          <button class="btn-primary" (click)="openModal()">
+            Agregar universidad
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Add/Edit Modal -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editingUniversity() ? 'Editar universidad' : 'Nueva universidad' }}</h3>
+          <button class="close-btn" (click)="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="saveUniversity()">
+            <div class="form-section">
+              <h4>Información General</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Nombre completo *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.name"
+                    name="name"
+                    placeholder="Universidad Nacional..."
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Siglas *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.shortName"
+                    name="shortName"
+                    placeholder="UNMSM"
+                    required
+                  >
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Ciudad *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.city"
+                    name="city"
+                    placeholder="Lima"
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Región *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.region"
+                    name="region"
+                    placeholder="Lima"
+                    required
+                  >
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Sitio web</label>
+                  <input
+                    type="url"
+                    [(ngModel)]="formData.websiteUrl"
+                    name="websiteUrl"
+                    placeholder="https://www.universidad.edu.pe"
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Año de fundación</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="formData.foundedYear"
+                    name="foundedYear"
+                    placeholder="1551"
+                  >
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Dirección</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.address"
+                  name="address"
+                  placeholder="Av. Venezuela cdra. 34"
+                >
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Estado de Membresía</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Estado *</label>
+                  <select [(ngModel)]="formData.membershipStatus" name="membershipStatus" required>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en_proceso">En proceso</option>
+                    <option value="activo">Activo</option>
+                    <option value="suspendido">Suspendido</option>
+                    <option value="inactivo">Inactivo</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Fecha de membresía</label>
+                  <input
+                    type="date"
+                    [(ngModel)]="formData.membershipDate"
+                    name="membershipDate"
+                  >
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>N° de certificado</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.certificateNumber"
+                    name="certificateNumber"
+                    placeholder="CERT-2024-001"
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Configuración de Visibilidad</h4>
+              <div class="checkbox-group">
+                <label>
+                  <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                  Mostrar en la web pública
+                </label>
+                <label>
+                  <input type="checkbox" [(ngModel)]="formData.isActive" name="isActive">
+                  Universidad activa
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="closeModal()">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-primary">
+                {{ editingUniversity() ? 'Guardar cambios' : 'Crear universidad' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>

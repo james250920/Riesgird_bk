@@ -1,0 +1,242 @@
+<div class="templates-management">
+      <div class="page-header">
+        <div class="header-content">
+          <h2>Plantillas Descargables</h2>
+          <p>Gestiona los formatos y plantillas para el proceso de membresía.</p>
+        </div>
+        <button class="btn-primary" (click)="openModal()">
+          <app-icon name="plus" [size]="18" /> Nueva Plantilla
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="file-text" [size]="24" /></span>
+          <div class="stat-info">
+            <h4>{{ templates().length }}</h4>
+            <p>Total plantillas</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="download" [size]="24" /></span>
+          <div class="stat-info">
+            <h4>{{ totalDownloads() }}</h4>
+            <p>Descargas totales</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="globe" [size]="24" /></span>
+          <div class="stat-info">
+            <h4>{{ publicTemplates() }}</h4>
+            <p>Plantillas públicas</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="check-circle" [size]="24" /></span>
+          <div class="stat-info">
+            <h4>{{ activeTemplates() }}</h4>
+            <p>Activas</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <span class="search-icon"><app-icon name="search" [size]="18" /></span>
+          <input
+            type="text"
+            placeholder="Buscar plantilla..."
+            [(ngModel)]="searchQuery"
+            (input)="applyFilters()"
+          >
+        </div>
+        <div class="filter-group">
+          <select [(ngModel)]="categoryFilter" (change)="applyFilters()">
+            <option value="all">Todas las categorías</option>
+            <option value="membresia">Membresía</option>
+            <option value="informes">Informes</option>
+            <option value="solicitudes">Solicitudes</option>
+            <option value="otros">Otros</option>
+          </select>
+          <select [(ngModel)]="formatFilter" (change)="applyFilters()">
+            <option value="all">Todos los formatos</option>
+            <option value="PDF">PDF</option>
+            <option value="DOCX">Word</option>
+            <option value="XLSX">Excel</option>
+            <option value="PPTX">PowerPoint</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Templates Grid -->
+      <div class="templates-grid">
+        @for (template of filteredTemplates(); track template.id) {
+          <div class="template-card" [class.inactive]="!template.isActive">
+            <div class="template-icon" [class]="getFormatClass(template.format)">
+              <app-icon [name]="getFormatIcon(template.format)" [size]="24" />
+            </div>
+
+            <div class="template-content">
+              <h4>{{ template.name }}</h4>
+              <p class="template-description">{{ template.description }}</p>
+
+              <div class="template-meta">
+                <span class="category-badge">{{ getCategoryLabel(template.category) }}</span>
+                <span class="format-badge">{{ template.format }}</span>
+                @if (template.version) {
+                  <span class="version-badge">v{{ template.version }}</span>
+                }
+              </div>
+
+              <div class="template-stats">
+                <span><app-icon name="download" [size]="14" /> {{ template.downloadCount }} descargas</span>
+                @if (template.fileSize) {
+                  <span><app-icon name="hard-drive" [size]="14" /> {{ template.fileSize }}</span>
+                }
+                <span><app-icon name="calendar" [size]="14" /> {{ formatDate(template.updatedAt) }}</span>
+              </div>
+            </div>
+
+            <div class="template-actions">
+              <div class="visibility-section">
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    [checked]="template.isPublic"
+                    (change)="togglePublic(template)"
+                  >
+                  <span class="slider"></span>
+                </label>
+                <span class="toggle-label">{{ template.isPublic ? 'Público' : 'Privado' }}</span>
+              </div>
+
+              <div class="action-buttons">
+                @if (template.fileUrl) {
+                  <a [href]="template.fileUrl" target="_blank" class="action-btn download" title="Descargar"><app-icon name="download" [size]="16" /></a>
+                }
+                <button class="action-btn" title="Editar" (click)="editTemplate(template)"><app-icon name="edit" [size]="16" /></button>
+                <button class="action-btn delete" title="Eliminar" (click)="deleteTemplate(template)"><app-icon name="trash" [size]="16" /></button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="empty-icon"><app-icon name="file-text" [size]="48" /></span>
+            <h3>No hay plantillas disponibles</h3>
+            <p>Sube la primera plantilla para el proceso de membresía</p>
+            <button class="btn-primary" (click)="openModal()">
+              Agregar plantilla
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Modal -->
+      @if (showModal()) {
+        <div class="modal-overlay" (click)="closeModal()">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ editingTemplate() ? 'Editar plantilla' : 'Nueva plantilla' }}</h3>
+              <button class="close-btn" (click)="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+              <form (ngSubmit)="saveTemplate()">
+                <div class="form-group">
+                  <label>Nombre *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.name"
+                    name="name"
+                    placeholder="Formato de solicitud de membresía"
+                    required
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Descripción</label>
+                  <textarea
+                    [(ngModel)]="formData.description"
+                    name="description"
+                    rows="2"
+                    placeholder="Describe el propósito de esta plantilla..."
+                  ></textarea>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Categoría *</label>
+                    <select [(ngModel)]="formData.category" name="category" required>
+                      <option value="membresia">Membresía</option>
+                      <option value="informes">Informes</option>
+                      <option value="solicitudes">Solicitudes</option>
+                      <option value="otros">Otros</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Formato *</label>
+                    <select [(ngModel)]="formData.format" name="format" required>
+                      <option value="PDF">PDF</option>
+                      <option value="DOCX">Word (DOCX)</option>
+                      <option value="XLSX">Excel (XLSX)</option>
+                      <option value="PPTX">PowerPoint (PPTX)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>URL del archivo *</label>
+                  <input
+                    type="url"
+                    [(ngModel)]="formData.fileUrl"
+                    name="fileUrl"
+                    placeholder="https://..."
+                    required
+                  >
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Tamaño del archivo</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.fileSize"
+                      name="fileSize"
+                      placeholder="2.5 MB"
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label>Versión</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.version"
+                      name="version"
+                      placeholder="1.0"
+                    >
+                  </div>
+                </div>
+
+                <div class="checkbox-group">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                    Disponible públicamente (sin login)
+                  </label>
+                  <label>
+                    <input type="checkbox" [(ngModel)]="formData.isActive" name="isActive">
+                    Plantilla activa
+                  </label>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                  <button type="submit" class="btn-primary">
+                    {{ editingTemplate() ? 'Guardar cambios' : 'Crear plantilla' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      }
+    </div>

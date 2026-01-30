@@ -1,0 +1,301 @@
+<div class="reports-repository">
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Repositorio de Reportes GIRD-ACC</h2>
+      <p>Informes anuales de gestión de riesgo de desastres por universidad.</p>
+    </div>
+    <button class="btn-primary" (click)="openModal()">
+      <app-icon name="plus" [size]="18" /> Nuevo Reporte
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <span class="search-icon"><app-icon name="search" [size]="16" /></span>
+      <input
+        type="text"
+        placeholder="Buscar reporte..."
+        [(ngModel)]="searchQuery"
+        (input)="applyFilters()"
+      >
+    </div>
+    <div class="filter-group">
+      <select [(ngModel)]="universityFilter" (change)="applyFilters()">
+        <option value="all">Todas las universidades</option>
+        @for (university of universities(); track university.id) {
+          <option [value]="university.id">{{ university.shortName }}</option>
+        }
+      </select>
+      <select [(ngModel)]="yearFilter" (change)="applyFilters()">
+        <option value="all">Todos los años</option>
+        @for (year of availableYears(); track year) {
+          <option [value]="year">{{ year }}</option>
+        }
+      </select>
+      <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+        <option value="all">Todos los estados</option>
+        <option value="borrador">Borrador</option>
+        <option value="en_revision">En revisión</option>
+        <option value="aprobado">Aprobado</option>
+        <option value="publicado">Publicado</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card total">
+      <span class="summary-icon"><app-icon name="report" [size]="24" /></span>
+      <div class="summary-info">
+        <h4>{{ totalReports() }}</h4>
+        <p>Reportes totales</p>
+      </div>
+    </div>
+    <div class="summary-card published">
+      <span class="summary-icon"><app-icon name="check-circle" [size]="24" /></span>
+      <div class="summary-info">
+        <h4>{{ publishedReports() }}</h4>
+        <p>Publicados</p>
+      </div>
+    </div>
+    <div class="summary-card pending">
+      <span class="summary-icon"><app-icon name="clock" [size]="24" /></span>
+      <div class="summary-info">
+        <h4>{{ pendingReports() }}</h4>
+        <p>En revisión</p>
+      </div>
+    </div>
+    <div class="summary-card universities">
+      <span class="summary-icon"><app-icon name="university" [size]="24" /></span>
+      <div class="summary-info">
+        <h4>{{ universitiesWithReports() }}</h4>
+        <p>Universidades</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reports by Year -->
+  @for (yearGroup of groupedByYear(); track yearGroup.year) {
+    <div class="year-section">
+      <div class="year-header">
+        <h3><app-icon name="calendar" [size]="18" /> Año {{ yearGroup.year }}</h3>
+        <span class="report-count">{{ yearGroup.reports.length }} reportes</span>
+      </div>
+
+      <div class="reports-grid">
+        @for (item of yearGroup.reports; track item.report.id) {
+          <div class="report-card" [class]="item.report.status">
+            <div class="report-header">
+              <div class="university-badge">
+                <span class="university-short">{{ item.university.shortName }}</span>
+              </div>
+              <span class="status-badge" [class]="item.report.status">
+                {{ getStatusLabel(item.report.status) }}
+              </span>
+            </div>
+
+            <div class="report-content">
+              <h4>{{ item.report.title }}</h4>
+              <p class="university-name">{{ item.university.name }}</p>
+
+              <div class="report-meta">
+                <span><app-icon name="calendar" [size]="14" /> Periodo: {{ item.report.periodStart }} - {{ item.report.periodEnd }}</span>
+                @if (item.report.submittedBy) {
+                  <span><app-icon name="user" [size]="14" /> {{ item.report.submittedBy }}</span>
+                }
+                @if (item.report.submittedAt) {
+                  <span><app-icon name="upload" [size]="14" /> {{ formatDate(item.report.submittedAt) }}</span>
+                }
+              </div>
+
+              @if (item.report.documentUrl) {
+                <a [href]="item.report.documentUrl" target="_blank" class="document-link">
+                  <app-icon name="file-text" [size]="20" /> Ver documento
+                </a>
+              }
+            </div>
+
+            <div class="report-footer">
+              <div class="visibility-toggle">
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    [checked]="item.report.isPublic"
+                    (change)="toggleVisibility(item)"
+                  >
+                  <span class="slider"></span>
+                </label>
+                <span class="toggle-label">{{ item.report.isPublic ? 'Público' : 'Privado' }}</span>
+              </div>
+              <div class="actions">
+                <button class="action-btn" title="Editar" (click)="editReport(item)"><app-icon name="edit" [size]="16" /></button>
+                @if (item.report.status === 'borrador' || item.report.status === 'en_revision') {
+                  <button class="action-btn approve" title="Aprobar" (click)="approveReport(item)"><app-icon name="check-circle" [size]="16" /></button>
+                }
+                @if (item.report.status === 'aprobado') {
+                  <button class="action-btn publish" title="Publicar" (click)="publishReport(item)"><app-icon name="check" [size]="16" /></button>
+                }
+                <button class="action-btn delete" title="Eliminar" (click)="deleteReport(item)"><app-icon name="trash" [size]="16" /></button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @empty {
+    <div class="empty-state">
+      <span class="empty-icon"><app-icon name="report" [size]="24" /></span>
+      <h3>No se encontraron reportes</h3>
+      <p>{{ searchQuery ? 'Intenta con otra búsqueda' : 'Registra el primer reporte GIRD-ACC' }}</p>
+      @if (!searchQuery) {
+        <button class="btn-primary" (click)="openModal()">
+          Agregar reporte
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Add/Edit Modal -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editingItem() ? 'Editar reporte' : 'Nuevo reporte' }}</h3>
+          <button class="close-btn" (click)="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="saveReport()">
+            <div class="form-section">
+              <h4>Universidad y Periodo</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Universidad *</label>
+                  <select
+                    [(ngModel)]="formData.universityId"
+                    name="universityId"
+                    required
+                    [disabled]="!!editingItem()"
+                  >
+                    <option value="">Seleccionar universidad</option>
+                    @for (university of universities(); track university.id) {
+                      <option [value]="university.id">{{ university.name }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Año *</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="formData.year"
+                    name="year"
+                    [min]="2000"
+                    [max]="currentYear"
+                    required
+                  >
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Periodo inicio *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.periodStart"
+                    name="periodStart"
+                    placeholder="Enero 2024"
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Periodo fin *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.periodEnd"
+                    name="periodEnd"
+                    placeholder="Diciembre 2024"
+                    required
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Información del Reporte</h4>
+              <div class="form-group">
+                <label>Título *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.title"
+                  name="title"
+                  placeholder="Informe Anual GIRD-ACC 2024"
+                  required
+                >
+              </div>
+
+              <div class="form-group">
+                <label>Descripción</label>
+                <textarea
+                  [(ngModel)]="formData.description"
+                  name="description"
+                  rows="3"
+                  placeholder="Resumen ejecutivo del reporte..."
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>URL del documento</label>
+                <input
+                  type="url"
+                  [(ngModel)]="formData.documentUrl"
+                  name="documentUrl"
+                  placeholder="https://..."
+                >
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Enviado por</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.submittedBy"
+                    name="submittedBy"
+                    placeholder="Dr. Juan Pérez"
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Estado *</label>
+                  <select [(ngModel)]="formData.status" name="status" required>
+                    <option value="borrador">Borrador</option>
+                    <option value="en_revision">En revisión</option>
+                    <option value="aprobado">Aprobado</option>
+                    <option value="publicado">Publicado</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Visibilidad</h4>
+              <div class="checkbox-group">
+                <label>
+                  <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                  Visible en la web pública
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="closeModal()">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-primary">
+                {{ editingItem() ? 'Guardar cambios' : 'Crear reporte' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,351 @@
+<div class="memories-management">
+      <div class="page-header">
+        <div class="header-content">
+          <h2>Memorias de Gestión</h2>
+          <p>Documentación histórica de la gestión institucional RIESGIRD-ACC.</p>
+        </div>
+        <button class="btn-primary" (click)="openModal()">
+          <app-icon name="plus" [size]="18" /> Nueva Memoria
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="memory" /></span>
+          <div class="stat-info">
+            <h4>{{ memories().length }}</h4>
+            <p>Memorias</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="check-circle" /></span>
+          <div class="stat-info">
+            <h4>{{ publishedMemories() }}</h4>
+            <p>Publicadas</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="calendar" /></span>
+          <div class="stat-info">
+            <h4>{{ yearsSpan() }}</h4>
+            <p>Años documentados</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="globe" /></span>
+          <div class="stat-info">
+            <h4>{{ publicMemories() }}</h4>
+            <p>Públicas</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <span class="search-icon"><app-icon name="search" [size]="18" /></span>
+          <input
+            type="text"
+            placeholder="Buscar memoria..."
+            [(ngModel)]="searchQuery"
+            (input)="applyFilters()"
+          >
+        </div>
+        <div class="filter-group">
+          <select [(ngModel)]="yearFilter" (change)="applyFilters()">
+            <option value="all">Todos los años</option>
+            @for (year of availableYears(); track year) {
+              <option [value]="year">{{ year }}</option>
+            }
+          </select>
+          <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+            <option value="all">Todos los tipos</option>
+            <option value="anual">Anual</option>
+            <option value="semestral">Semestral</option>
+            <option value="especial">Especial</option>
+          </select>
+          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="all">Todos los estados</option>
+            <option value="borrador">Borrador</option>
+            <option value="revision">En revisión</option>
+            <option value="publicada">Publicada</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Memories Timeline -->
+      <div class="memories-timeline">
+        @for (memory of filteredMemories(); track memory.id) {
+          <div class="memory-card" [class]="memory.status">
+            <div class="memory-year">
+              <span class="year">{{ memory.year }}</span>
+              @if (memory.period) {
+                <span class="period">{{ memory.period }}</span>
+              }
+            </div>
+
+            <div class="memory-content">
+              <div class="memory-header">
+                <div class="header-info">
+                  <h4>{{ memory.title }}</h4>
+                  <div class="type-badge">{{ getTypeLabel(memory.type) }}</div>
+                </div>
+                <span class="status-badge" [class]="memory.status">
+                  {{ getStatusLabel(memory.status) }}
+                </span>
+              </div>
+
+              @if (memory.description) {
+                <p class="memory-description">{{ memory.description }}</p>
+              }
+
+              <div class="memory-details">
+                @if (memory.president) {
+                  <div class="detail-item">
+                    <span class="detail-icon"><app-icon name="user" [size]="16" /></span>
+                    <span>Presidente: {{ memory.president }}</span>
+                  </div>
+                }
+                @if (memory.pageCount) {
+                  <div class="detail-item">
+                    <span class="detail-icon"><app-icon name="file-text" [size]="16" /></span>
+                    <span>{{ memory.pageCount }} páginas</span>
+                  </div>
+                }
+                @if (memory.publishedDate) {
+                  <div class="detail-item">
+                    <span class="detail-icon"><app-icon name="calendar" [size]="16" /></span>
+                    <span>Publicada: {{ formatDate(memory.publishedDate) }}</span>
+                  </div>
+                }
+              </div>
+
+              @if (memory.highlights && memory.highlights.length) {
+                <div class="highlights">
+                  <span class="highlights-label">Logros destacados:</span>
+                  <ul>
+                    @for (highlight of memory.highlights.slice(0, 3); track highlight) {
+                      <li>{{ highlight }}</li>
+                    }
+                    @if (memory.highlights.length > 3) {
+                      <li class="more">...y {{ memory.highlights.length - 3 }} más</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+
+            <div class="memory-footer">
+              <div class="footer-left">
+                <div class="visibility-toggle">
+                  <label class="switch">
+                    <input
+                      type="checkbox"
+                      [checked]="memory.isPublic"
+                      (change)="toggleVisibility(memory)"
+                    >
+                    <span class="slider"></span>
+                  </label>
+                  <span class="toggle-label">{{ memory.isPublic ? 'Público' : 'Interno' }}</span>
+                </div>
+              </div>
+              <div class="action-buttons">
+                @if (memory.documentUrl) {
+                  <a [href]="memory.documentUrl" target="_blank" class="action-btn" title="Descargar PDF"><app-icon name="download" [size]="16" /></a>
+                }
+                @if (memory.digitalBookUrl) {
+                  <a [href]="memory.digitalBookUrl" target="_blank" class="action-btn" title="Ver libro digital"><app-icon name="book" [size]="16" /></a>
+                }
+                <button class="action-btn" title="Editar" (click)="editMemory(memory)"><app-icon name="edit" [size]="16" /></button>
+                <button class="action-btn delete" title="Eliminar" (click)="deleteMemory(memory)"><app-icon name="trash" [size]="16" /></button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="empty-icon"><app-icon name="memory" [size]="48" /></span>
+            <h3>No hay memorias registradas</h3>
+            <p>Documenta la primera memoria de gestión</p>
+            <button class="btn-primary" (click)="openModal()">
+              Crear memoria
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Modal -->
+      @if (showModal()) {
+        <div class="modal-overlay" (click)="closeModal()">
+          <div class="modal modal-lg" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ editingMemory() ? 'Editar memoria' : 'Nueva memoria' }}</h3>
+              <button class="close-btn" (click)="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+              <form (ngSubmit)="saveMemory()">
+                <div class="form-section">
+                  <h4>Información General</h4>
+                  <div class="form-group">
+                    <label>Título *</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.title"
+                      name="title"
+                      placeholder="Memoria de Gestión 2024"
+                      required
+                    >
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Año *</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="formData.year"
+                        name="year"
+                        min="2010"
+                        max="2050"
+                        required
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Tipo *</label>
+                      <select [(ngModel)]="formData.type" name="type" required>
+                        <option value="anual">Anual</option>
+                        <option value="semestral">Semestral</option>
+                        <option value="especial">Especial</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Período</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="formData.period"
+                        name="period"
+                        placeholder="Enero - Diciembre 2024"
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Estado *</label>
+                      <select [(ngModel)]="formData.status" name="status" required>
+                        <option value="borrador">Borrador</option>
+                        <option value="revision">En revisión</option>
+                        <option value="publicada">Publicada</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea
+                      [(ngModel)]="formData.description"
+                      name="description"
+                      rows="2"
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Información Institucional</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Presidente del período</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="formData.president"
+                        name="president"
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>N° de páginas</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="formData.pageCount"
+                        name="pageCount"
+                        min="0"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Fecha de publicación</label>
+                    <input
+                      type="date"
+                      [(ngModel)]="formData.publishedDate"
+                      name="publishedDate"
+                    >
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Logros Destacados</h4>
+                  <div class="form-group">
+                    <div class="highlights-input">
+                      @for (highlight of formData.highlights; track highlight; let i = $index) {
+                        <div class="highlight-item">
+                          <span>{{ highlight }}</span>
+                          <button type="button" (click)="removeHighlight(i)">×</button>
+                        </div>
+                      }
+                      <input
+                        type="text"
+                        placeholder="Agregar logro destacado..."
+                        (keydown.enter)="addHighlight($event)"
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Enlaces</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>URL del documento PDF</label>
+                      <input
+                        type="url"
+                        [(ngModel)]="formData.documentUrl"
+                        name="documentUrl"
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>URL del libro digital</label>
+                      <input
+                        type="url"
+                        [(ngModel)]="formData.digitalBookUrl"
+                        name="digitalBookUrl"
+                      >
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>URL de portada</label>
+                    <input
+                      type="url"
+                      [(ngModel)]="formData.coverImageUrl"
+                      name="coverImageUrl"
+                    >
+                  </div>
+                </div>
+
+                <div class="checkbox-group">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                    Disponible en web pública
+                  </label>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                  <button type="submit" class="btn-primary">
+                    {{ editingMemory() ? 'Guardar cambios' : 'Crear memoria' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      }
+    </div>

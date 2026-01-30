@@ -1,0 +1,204 @@
+<div class="normative-library">
+      <div class="page-header">
+        <div class="header-content">
+          <h2>Biblioteca Normativa</h2>
+          <p>Gestiona el Estatuto, Plan de Trabajo y documentos normativos de la red.</p>
+        </div>
+        <button class="btn-primary" (click)="openUploadModal()">
+          ➕ Subir documento
+        </button>
+      </div>
+
+      <!-- Document Categories -->
+      <div class="categories">
+        <button
+          class="category-btn"
+          [class.active]="selectedCategory() === 'all'"
+          (click)="selectedCategory.set('all')"
+        >
+          Todos
+        </button>
+        <button
+          class="category-btn"
+          [class.active]="selectedCategory() === 'estatuto'"
+          (click)="selectedCategory.set('estatuto')"
+        >
+          Estatuto
+        </button>
+        <button
+          class="category-btn"
+          [class.active]="selectedCategory() === 'plan_trabajo'"
+          (click)="selectedCategory.set('plan_trabajo')"
+        >
+          Plan de Trabajo
+        </button>
+        <button
+          class="category-btn"
+          [class.active]="selectedCategory() === 'reglamento'"
+          (click)="selectedCategory.set('reglamento')"
+        >
+          Reglamentos
+        </button>
+        <button
+          class="category-btn"
+          [class.active]="selectedCategory() === 'otro'"
+          (click)="selectedCategory.set('otro')"
+        >
+          Otros
+        </button>
+      </div>
+
+      <!-- Documents Grid -->
+      <div class="documents-grid">
+        @for (doc of filteredDocuments(); track doc.id) {
+          <div class="document-card" [class.inactive]="!doc.isActive">
+            <div class="doc-icon">
+              {{ getDocIcon(doc.type) }}
+            </div>
+            <div class="doc-content">
+              <h4>{{ doc.name }}</h4>
+              <p class="doc-description">{{ doc.description }}</p>
+              <div class="doc-meta">
+                <span class="doc-size">{{ formatFileSize(doc.fileSize) }}</span>
+                <span class="doc-date">{{ formatDate(doc.uploadDate) }}</span>
+              </div>
+            </div>
+            <div class="doc-actions">
+              <div class="visibility-badge" [class.public]="doc.isPublic">
+                {{ doc.isPublic ? '🌐 Público' : '🔒 Privado' }}
+              </div>
+              <div class="action-buttons">
+                <button class="action-btn" title="Descargar" (click)="downloadDocument(doc)">
+                  ⬇️
+                </button>
+                <button class="action-btn" title="Editar" (click)="editDocument(doc)">
+                  ✏️
+                </button>
+                <button class="action-btn" title="Reemplazar" (click)="replaceDocument(doc)">
+                  🔄
+                </button>
+                <button class="action-btn delete" title="Eliminar" (click)="deleteDocument(doc)">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="empty-icon">📁</span>
+            <h3>No hay documentos</h3>
+            <p>Sube el primer documento normativo</p>
+            <button class="btn-primary" (click)="openUploadModal()">
+              Subir documento
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Upload Modal -->
+      @if (showUploadModal()) {
+        <div class="modal-overlay" (click)="closeModals()">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ editingDocument() ? 'Editar documento' : 'Subir nuevo documento' }}</h3>
+              <button class="close-btn" (click)="closeModals()">×</button>
+            </div>
+            <div class="modal-body">
+              <form (ngSubmit)="saveDocument()">
+                <div class="form-group">
+                  <label>Nombre del documento *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.name"
+                    name="name"
+                    placeholder="Ej: Estatuto de la Red 2024"
+                    required
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Tipo de documento *</label>
+                  <select [(ngModel)]="formData.type" name="type" required>
+                    <option value="estatuto">Estatuto</option>
+                    <option value="plan_trabajo">Plan de Trabajo</option>
+                    <option value="reglamento">Reglamento</option>
+                    <option value="otro">Otro</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Descripción</label>
+                  <textarea
+                    [(ngModel)]="formData.description"
+                    name="description"
+                    rows="3"
+                    placeholder="Breve descripción del documento..."
+                  ></textarea>
+                </div>
+
+                @if (!editingDocument()) {
+                  <div class="form-group">
+                    <label>Archivo PDF *</label>
+                    <div class="file-upload">
+                      <input
+                        type="file"
+                        id="fileInput"
+                        accept=".pdf"
+                        (change)="onFileSelected($event)"
+                        hidden
+                      >
+                      <label for="fileInput" class="file-label">
+                        @if (selectedFile()) {
+                          <span>📄 {{ selectedFile()?.name }}</span>
+                        } @else {
+                          <span>📁 Seleccionar archivo PDF</span>
+                        }
+                      </label>
+                    </div>
+                  </div>
+                }
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Fecha de vigencia</label>
+                    <input
+                      type="date"
+                      [(ngModel)]="formData.validFrom"
+                      name="validFrom"
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label>Válido hasta</label>
+                    <input
+                      type="date"
+                      [(ngModel)]="formData.validTo"
+                      name="validTo"
+                    >
+                  </div>
+                </div>
+
+                <div class="form-group checkbox-group">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                    Visible en la web pública
+                  </label>
+                  <label>
+                    <input type="checkbox" [(ngModel)]="formData.isActive" name="isActive">
+                    Documento activo
+                  </label>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" (click)="closeModals()">
+                    Cancelar
+                  </button>
+                  <button type="submit" class="btn-primary">
+                    {{ editingDocument() ? 'Guardar cambios' : 'Subir documento' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      }
+    </div>

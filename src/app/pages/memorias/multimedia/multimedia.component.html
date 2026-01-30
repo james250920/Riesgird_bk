@@ -1,0 +1,355 @@
+<div class="multimedia-management">
+      <div class="page-header">
+        <div class="header-content">
+          <h2>Galería Multimedia</h2>
+          <p>Álbumes fotográficos y videos históricos GIRD-ACC.</p>
+        </div>
+        <button class="btn-primary" (click)="openModal()">
+          <app-icon name="plus" [size]="18" /> Nuevo Álbum
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="folder" /></span>
+          <div class="stat-info">
+            <h4>{{ albums().length }}</h4>
+            <p>Álbumes</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="camera" /></span>
+          <div class="stat-info">
+            <h4>{{ photoAlbums() }}</h4>
+            <p>Fotografías</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="multimedia" /></span>
+          <div class="stat-info">
+            <h4>{{ videoAlbums() }}</h4>
+            <p>Videos</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="globe" /></span>
+          <div class="stat-info">
+            <h4>{{ publicAlbums() }}</h4>
+            <p>Públicos</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- View Toggle & Filters -->
+      <div class="filters-bar">
+        <div class="view-toggle">
+          <button
+            class="toggle-btn"
+            [class.active]="viewMode() === 'grid'"
+            (click)="viewMode.set('grid')"
+          >
+            <app-icon name="grid" [size]="16" /> Cuadrícula
+          </button>
+          <button
+            class="toggle-btn"
+            [class.active]="viewMode() === 'list'"
+            (click)="viewMode.set('list')"
+          >
+            <app-icon name="list" [size]="16" /> Lista
+          </button>
+        </div>
+        <div class="search-box">
+          <span class="search-icon"><app-icon name="search" [size]="18" /></span>
+          <input
+            type="text"
+            placeholder="Buscar álbum..."
+            [(ngModel)]="searchQuery"
+            (input)="applyFilters()"
+          >
+        </div>
+        <div class="filter-group">
+          <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+            <option value="all">Todos los tipos</option>
+            <option value="fotos">Fotografías</option>
+            <option value="videos">Videos</option>
+            <option value="mixto">Mixto</option>
+          </select>
+          <select [(ngModel)]="yearFilter" (change)="applyFilters()">
+            <option value="all">Todos los años</option>
+            @for (year of availableYears(); track year) {
+              <option [value]="year">{{ year }}</option>
+            }
+          </select>
+          <select [(ngModel)]="eventTypeFilter" (change)="applyFilters()">
+            <option value="all">Todos los eventos</option>
+            <option value="congreso">Congresos</option>
+            <option value="asamblea">Asambleas</option>
+            <option value="capacitacion">Capacitaciones</option>
+            <option value="institucional">Institucional</option>
+            <option value="otro">Otros</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Albums Grid View -->
+      @if (viewMode() === 'grid') {
+        <div class="albums-grid">
+          @for (album of filteredAlbums(); track album.id) {
+            <div class="album-card">
+              <div class="album-cover" (click)="openAlbum(album)">
+                @if (album.coverImageUrl) {
+                  <img [src]="album.coverImageUrl" [alt]="album.title">
+                } @else {
+                  <div class="cover-placeholder">
+                    <span>{{ getTypeIcon(album.type) }}</span>
+                  </div>
+                }
+                <div class="album-overlay">
+                  <span class="view-label">Ver álbum</span>
+                </div>
+                <div class="album-badges">
+                  <span class="type-badge">{{ getTypeLabel(album.type) }}</span>
+                  @if (album.itemsCount) {
+                    <span class="count-badge">{{ album.itemsCount }} items</span>
+                  }
+                </div>
+              </div>
+
+              <div class="album-info">
+                <h4>{{ album.title }}</h4>
+                <div class="album-meta">
+                  <span class="event-type">{{ getEventTypeLabel(album.eventType) }}</span>
+                  <span class="date">{{ formatDate(album.eventDate) }}</span>
+                </div>
+              </div>
+
+              <div class="album-footer">
+                <div class="visibility-toggle">
+                  <label class="switch">
+                    <input
+                      type="checkbox"
+                      [checked]="album.isPublic"
+                      (change)="toggleVisibility(album)"
+                    >
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="action-buttons">
+                  @if (album.externalUrl) {
+                    <a [href]="album.externalUrl" target="_blank" class="action-btn" title="Ver externo"><app-icon name="link" [size]="16" /></a>
+                  }
+                  <button class="action-btn" title="Editar" (click)="editAlbum(album)"><app-icon name="edit" [size]="16" /></button>
+                  <button class="action-btn delete" title="Eliminar" (click)="deleteAlbum(album)"><app-icon name="trash" [size]="16" /></button>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-state">
+              <span class="empty-icon"><app-icon name="camera" [size]="48" /></span>
+              <h3>No hay álbumes registrados</h3>
+              <p>Crea el primer álbum multimedia</p>
+              <button class="btn-primary" (click)="openModal()">
+                Crear álbum
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Albums List View -->
+      @if (viewMode() === 'list') {
+        <div class="albums-list">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Álbum</th>
+                <th>Tipo</th>
+                <th>Evento</th>
+                <th>Fecha</th>
+                <th>Items</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (album of filteredAlbums(); track album.id) {
+                <tr>
+                  <td>
+                    <div class="album-cell">
+                      @if (album.coverImageUrl) {
+                        <img [src]="album.coverImageUrl" class="album-thumb">
+                      } @else {
+                        <div class="thumb-placeholder">{{ getTypeIcon(album.type) }}</div>
+                      }
+                      <span class="album-title">{{ album.title }}</span>
+                    </div>
+                  </td>
+                  <td><span class="type-badge inline">{{ getTypeLabel(album.type) }}</span></td>
+                  <td>{{ getEventTypeLabel(album.eventType) }}</td>
+                  <td>{{ formatDate(album.eventDate) }}</td>
+                  <td>{{ album.itemsCount || 0 }}</td>
+                  <td>
+                    <div class="visibility-toggle">
+                      <label class="switch">
+                        <input
+                          type="checkbox"
+                          [checked]="album.isPublic"
+                          (change)="toggleVisibility(album)"
+                        >
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      @if (album.externalUrl) {
+                        <a [href]="album.externalUrl" target="_blank" class="action-btn" title="Ver externo"><app-icon name="link" [size]="16" /></a>
+                      }
+                      <button class="action-btn" title="Editar" (click)="editAlbum(album)"><app-icon name="edit" [size]="16" /></button>
+                      <button class="action-btn delete" title="Eliminar" (click)="deleteAlbum(album)"><app-icon name="trash" [size]="16" /></button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="empty-cell">No hay álbumes registrados</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- Modal -->
+      @if (showModal()) {
+        <div class="modal-overlay" (click)="closeModal()">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ editingAlbum() ? 'Editar álbum' : 'Nuevo álbum' }}</h3>
+              <button class="close-btn" (click)="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+              <form (ngSubmit)="saveAlbum()">
+                <div class="form-section">
+                  <h4>Información del Álbum</h4>
+                  <div class="form-group">
+                    <label>Título *</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.title"
+                      name="title"
+                      required
+                    >
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Tipo *</label>
+                      <select [(ngModel)]="formData.type" name="type" required>
+                        <option value="fotos">Fotografías</option>
+                        <option value="videos">Videos</option>
+                        <option value="mixto">Mixto</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Tipo de evento</label>
+                      <select [(ngModel)]="formData.eventType" name="eventType">
+                        <option value="congreso">Congreso</option>
+                        <option value="asamblea">Asamblea</option>
+                        <option value="capacitacion">Capacitación</option>
+                        <option value="institucional">Institucional</option>
+                        <option value="otro">Otro</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Fecha del evento</label>
+                      <input
+                        type="date"
+                        [(ngModel)]="formData.eventDate"
+                        name="eventDate"
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>N° de items</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="formData.itemsCount"
+                        name="itemsCount"
+                        min="0"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea
+                      [(ngModel)]="formData.description"
+                      name="description"
+                      rows="2"
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Enlaces</h4>
+                  <div class="form-group">
+                    <label>URL de portada</label>
+                    <input
+                      type="url"
+                      [(ngModel)]="formData.coverImageUrl"
+                      name="coverImageUrl"
+                    >
+                  </div>
+
+                  <div class="form-group">
+                    <label>URL externa (Google Photos, Drive, YouTube...)</label>
+                    <input
+                      type="url"
+                      [(ngModel)]="formData.externalUrl"
+                      name="externalUrl"
+                    >
+                  </div>
+
+                  <div class="form-group">
+                    <label>URL de descarga</label>
+                    <input
+                      type="url"
+                      [(ngModel)]="formData.downloadUrl"
+                      name="downloadUrl"
+                    >
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Tags (separados por coma)</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.tags"
+                    name="tags"
+                    placeholder="congreso, 2024, lima..."
+                  >
+                </div>
+
+                <div class="checkbox-group">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                    Disponible en galería pública
+                  </label>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                  <button type="submit" class="btn-primary">
+                    {{ editingAlbum() ? 'Guardar cambios' : 'Crear álbum' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      }
+    </div>

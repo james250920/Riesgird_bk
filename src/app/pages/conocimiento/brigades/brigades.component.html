@@ -1,0 +1,326 @@
+<div class="brigades-management">
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Brigadas Universitarias</h2>
+      <p>Gestión de brigadas estudiantiles GIRD-ACC.</p>
+    </div>
+    <button class="btn-primary" (click)="openModal()">
+      <app-icon name="plus" [size]="18" /> Nueva Brigada
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-icon"><app-icon name="brigade" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ brigades().length }}</h4>
+        <p>Brigadas</p>
+      </div>
+    </div>
+    <div class="stat-card active">
+      <span class="stat-icon"><app-icon name="check" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ activeBrigades() }}</h4>
+        <p>Activas</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icon name="users" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ totalMembers() }}</h4>
+        <p>Miembros</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icon name="university" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ universitiesWithBrigades() }}</h4>
+        <p>Universidades</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <span class="search-icon"><app-icon name="search" [size]="18" /></span>
+      <input
+        type="text"
+        placeholder="Buscar brigada..."
+        [(ngModel)]="searchQuery"
+        (input)="applyFilters()"
+      >
+    </div>
+    <div class="filter-group">
+      <select [(ngModel)]="universityFilter" (change)="applyFilters()">
+        <option value="all">Todas las universidades</option>
+        @for (uni of universities(); track uni.id) {
+          <option [value]="uni.id">{{ uni.shortName }}</option>
+        }
+      </select>
+      <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+        <option value="all">Todos los tipos</option>
+        <option value="emergencias">Emergencias</option>
+        <option value="primeros_auxilios">Primeros Auxilios</option>
+        <option value="evacuacion">Evacuación</option>
+        <option value="comunicaciones">Comunicaciones</option>
+        <option value="logistica">Logística</option>
+      </select>
+      <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+        <option value="all">Todos los estados</option>
+        <option value="activa">Activa</option>
+        <option value="en_formacion">En formación</option>
+        <option value="inactiva">Inactiva</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Brigades Grid -->
+  <div class="brigades-grid">
+    @for (brigade of filteredBrigades(); track brigade.id) {
+      <div class="brigade-card" [class]="brigade.status">
+        <div class="brigade-header">
+          <div class="brigade-icon">
+            {{ getBrigadeTypeIcon(brigade.type) }}
+          </div>
+          <div class="brigade-title">
+            <h4>{{ brigade.name }}</h4>
+            <span class="university-name">{{ getUniversityName(brigade.universityId) }}</span>
+          </div>
+          <span class="status-badge" [class]="brigade.status">
+            {{ getStatusLabel(brigade.status) }}
+          </span>
+        </div>
+
+        <div class="brigade-content">
+          <div class="type-badge">{{ getBrigadeTypeLabel(brigade.type) }}</div>
+
+          @if (brigade.description) {
+            <p class="brigade-description">{{ brigade.description | slice:0:100 }}...</p>
+          }
+
+          <div class="brigade-stats">
+            <div class="stat-item">
+              <span class="stat-icon"><app-icon name="users" [size]="14" /></span>
+              <span class="stat-value">{{ brigade.membersCount || 0 }}</span>
+              <span class="stat-label">miembros</span>
+            </div>
+            @if (brigade.coordinator) {
+              <div class="stat-item">
+                <span class="stat-icon"><app-icon name="user" [size]="14" /></span>
+                <span class="stat-value">{{ brigade.coordinator }}</span>
+                <span class="stat-label">coordinador</span>
+              </div>
+            }
+          </div>
+
+          @if (brigade.foundedDate) {
+            <div class="founded-date">
+              <app-icon name="calendar" [size]="14" /> Fundada: {{ formatDate(brigade.foundedDate) }}
+            </div>
+          }
+
+          @if (brigade.certifications && brigade.certifications.length) {
+            <div class="certifications">
+              <span class="cert-label">Certificaciones:</span>
+              <div class="cert-list">
+                @for (cert of brigade.certifications.slice(0, 2); track cert) {
+                  <span class="cert-badge">{{ cert }}</span>
+                }
+                @if (brigade.certifications.length > 2) {
+                  <span class="more-certs">+{{ brigade.certifications.length - 2 }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="brigade-footer">
+          <div class="footer-left">
+            <div class="visibility-toggle">
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  [checked]="brigade.isPublic"
+                  (change)="toggleVisibility(brigade)"
+                >
+                <span class="slider"></span>
+              </label>
+              <span class="toggle-label">{{ brigade.isPublic ? 'Público' : 'Interno' }}</span>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button class="action-btn" title="Ver miembros" (click)="viewMembers(brigade)"><app-icon name="users" [size]="16" /></button>
+            <button class="action-btn" title="Editar" (click)="editBrigade(brigade)"><app-icon name="edit" [size]="16" /></button>
+            <button class="action-btn delete" title="Eliminar" (click)="deleteBrigade(brigade)"><app-icon name="trash" [size]="16" /></button>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <span class="empty-icon"><app-icon name="brigade" [size]="48" /></span>
+        <h3>No hay brigadas registradas</h3>
+        <p>Registra la primera brigada universitaria</p>
+        <button class="btn-primary" (click)="openModal()">
+          Crear brigada
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Modal -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editingBrigade() ? 'Editar brigada' : 'Nueva brigada' }}</h3>
+          <button class="close-btn" (click)="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="saveBrigade()">
+            <div class="form-section">
+              <h4>Información General</h4>
+              <div class="form-group">
+                <label>Nombre de la brigada *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.name"
+                  name="name"
+                  required
+                >
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Universidad *</label>
+                  <select [(ngModel)]="formData.universityId" name="universityId" required>
+                    @for (uni of universities(); track uni.id) {
+                      <option [value]="uni.id">{{ uni.name }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Tipo *</label>
+                  <select [(ngModel)]="formData.type" name="type" required>
+                    <option value="emergencias">Emergencias</option>
+                    <option value="primeros_auxilios">Primeros Auxilios</option>
+                    <option value="evacuacion">Evacuación</option>
+                    <option value="comunicaciones">Comunicaciones</option>
+                    <option value="logistica">Logística</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Descripción</label>
+                <textarea
+                  [(ngModel)]="formData.description"
+                  name="description"
+                  rows="2"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Organización</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Coordinador/a</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.coordinator"
+                    name="coordinator"
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Email de contacto</label>
+                  <input
+                    type="email"
+                    [(ngModel)]="formData.contactEmail"
+                    name="contactEmail"
+                  >
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>N° de miembros</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="formData.membersCount"
+                    name="membersCount"
+                    min="0"
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Fecha de fundación</label>
+                  <input
+                    type="date"
+                    [(ngModel)]="formData.foundedDate"
+                    name="foundedDate"
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Certificaciones</h4>
+              <div class="form-group">
+                <div class="tags-input">
+                  @for (cert of formData.certifications; track cert; let i = $index) {
+                    <span class="tag">
+                      {{ cert }}
+                      <button type="button" (click)="removeCertification(i)">×</button>
+                    </span>
+                  }
+                  <input
+                    type="text"
+                    placeholder="Agregar certificación..."
+                    (keydown.enter)="addCertification($event)"
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Estado</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Estado actual *</label>
+                  <select [(ngModel)]="formData.status" name="status" required>
+                    <option value="activa">Activa</option>
+                    <option value="en_formacion">En formación</option>
+                    <option value="inactiva">Inactiva</option>
+                  </select>
+                </div>
+                <div class="form-group logo-group">
+                  <label>URL de logo/imagen</label>
+                  <input
+                    type="url"
+                    [(ngModel)]="formData.logoUrl"
+                    name="logoUrl"
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="checkbox-group">
+              <label>
+                <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                Visible en directorio público
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+              <button type="submit" class="btn-primary">
+                {{ editingBrigade() ? 'Guardar cambios' : 'Crear brigada' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>

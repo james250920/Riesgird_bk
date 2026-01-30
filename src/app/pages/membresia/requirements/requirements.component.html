@@ -1,0 +1,230 @@
+<div class="requirements-management">
+      <div class="page-header">
+        <div class="header-content">
+          <h2>Requisitos de Membresía</h2>
+          <p>Gestiona los requisitos para la adscripción a la red.</p>
+        </div>
+        <button class="btn-primary" (click)="openModal()">
+          <app-icon name="plus" [size]="18" /> Nuevo Requisito
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <span class="search-icon"><app-icon name="search" [size]="16" /></span>
+          <input
+            type="text"
+            placeholder="Buscar requisito..."
+            [(ngModel)]="searchQuery"
+            (input)="applyFilters()"
+          >
+        </div>
+        <div class="filter-group">
+          <select [(ngModel)]="categoryFilter" (change)="applyFilters()">
+            <option value="all">Todas las categorías</option>
+            <option value="documentacion">Documentación</option>
+            <option value="institucional">Institucional</option>
+            <option value="tecnico">Técnico</option>
+            <option value="financiero">Financiero</option>
+          </select>
+          <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+            <option value="all">Todos los tipos</option>
+            <option value="obligatorio">Obligatorio</option>
+            <option value="opcional">Opcional</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-value">{{ requirements().length }}</span>
+          <span class="stat-label">Total requisitos</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">{{ obligatoriosCount() }}</span>
+          <span class="stat-label">Obligatorios</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">{{ opcionalesCount() }}</span>
+          <span class="stat-label">Opcionales</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">{{ activeCount() }}</span>
+          <span class="stat-label">Activos</span>
+        </div>
+      </div>
+
+      <!-- Requirements List -->
+      <div class="requirements-list">
+        @for (requirement of filteredRequirements(); track requirement.id; let i = $index) {
+          <div class="requirement-card" [class.inactive]="!requirement.isActive">
+            <div class="requirement-order">
+              <button class="order-btn" (click)="moveUp(requirement)" [disabled]="i === 0">▲</button>
+              <span class="order-number">{{ requirement.order }}</span>
+              <button class="order-btn" (click)="moveDown(requirement)" [disabled]="i === filteredRequirements().length - 1">▼</button>
+            </div>
+
+            <div class="requirement-content">
+              <div class="requirement-header">
+                <h4>{{ requirement.title }}</h4>
+                <div class="badges">
+                  <span class="category-badge" [class]="requirement.category">
+                    {{ getCategoryLabel(requirement.category) }}
+                  </span>
+                  <span class="type-badge" [class]="requirement.type">
+                    @if (requirement.type === 'obligatorio') {
+                      <app-icon name="alert-circle" [size]="14" /> Obligatorio
+                    } @else {
+                      <app-icon name="requirement" [size]="14" /> Opcional
+                    }
+                  </span>
+                </div>
+              </div>
+
+              <p class="requirement-description">{{ requirement.description }}</p>
+
+              @if (requirement.documentFormat || requirement.maxFileSize) {
+                <div class="requirement-specs">
+                  @if (requirement.documentFormat) {
+                    <span><app-icon name="file-text" [size]="14" /> Formato: {{ requirement.documentFormat }}</span>
+                  }
+                  @if (requirement.maxFileSize) {
+                    <span><app-icon name="database" [size]="14" /> Máx: {{ requirement.maxFileSize }}</span>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="requirement-actions">
+              <div class="visibility-toggle">
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    [checked]="requirement.isActive"
+                    (change)="toggleActive(requirement)"
+                  >
+                  <span class="slider"></span>
+                </label>
+                <span class="toggle-label">{{ requirement.isActive ? 'Activo' : 'Inactivo' }}</span>
+              </div>
+              <div class="action-buttons">
+                <button class="action-btn" title="Editar" (click)="editRequirement(requirement)"><app-icon name="edit" [size]="16" /></button>
+                <button class="action-btn delete" title="Eliminar" (click)="deleteRequirement(requirement)"><app-icon name="trash" [size]="16" /></button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="empty-icon"><app-icon name="requirement" [size]="48" /></span>
+            <h3>No se encontraron requisitos</h3>
+            <p>Crea el primer requisito de membresía</p>
+            <button class="btn-primary" (click)="openModal()">
+              Agregar requisito
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Modal -->
+      @if (showModal()) {
+        <div class="modal-overlay" (click)="closeModal()">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ editingRequirement() ? 'Editar requisito' : 'Nuevo requisito' }}</h3>
+              <button class="close-btn" (click)="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+              <form (ngSubmit)="saveRequirement()">
+                <div class="form-group">
+                  <label>Título *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.title"
+                    name="title"
+                    placeholder="Ej: Carta de compromiso institucional"
+                    required
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Descripción *</label>
+                  <textarea
+                    [(ngModel)]="formData.description"
+                    name="description"
+                    rows="3"
+                    placeholder="Describe el requisito en detalle..."
+                    required
+                  ></textarea>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Categoría *</label>
+                    <select [(ngModel)]="formData.category" name="category" required>
+                      <option value="documentacion">Documentación</option>
+                      <option value="institucional">Institucional</option>
+                      <option value="tecnico">Técnico</option>
+                      <option value="financiero">Financiero</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Tipo *</label>
+                    <select [(ngModel)]="formData.type" name="type" required>
+                      <option value="obligatorio">Obligatorio</option>
+                      <option value="opcional">Opcional</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Formato de documento</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.documentFormat"
+                      name="documentFormat"
+                      placeholder="PDF, DOC, etc."
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label>Tamaño máximo</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.maxFileSize"
+                      name="maxFileSize"
+                      placeholder="5MB, 10MB, etc."
+                    >
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Orden de visualización</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="formData.order"
+                    name="order"
+                    min="1"
+                  >
+                </div>
+
+                <div class="checkbox-group">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="formData.isActive" name="isActive">
+                    Requisito activo
+                  </label>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                  <button type="submit" class="btn-primary">
+                    {{ editingRequirement() ? 'Guardar cambios' : 'Crear requisito' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      }
+    </div>

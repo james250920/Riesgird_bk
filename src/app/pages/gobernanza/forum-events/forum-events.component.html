@@ -1,0 +1,349 @@
+<div class="forum-events">
+      <div class="page-header">
+        <div class="header-content">
+          <h2>Foro Interuniversitario</h2>
+          <p>Gestión de eventos del foro y actividades interuniversitarias.</p>
+        </div>
+        <button class="btn-primary" (click)="openModal()">
+          <app-icon name="plus" [size]="18" /> Nuevo Evento
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="calendar" /></span>
+          <div class="stat-info">
+            <h4>{{ events().length }}</h4>
+            <p>Total eventos</p>
+          </div>
+        </div>
+        <div class="stat-card upcoming">
+          <span class="stat-icon"><app-icon name="clock" /></span>
+          <div class="stat-info">
+            <h4>{{ upcomingEvents() }}</h4>
+            <p>Próximos</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="check-circle" /></span>
+          <div class="stat-info">
+            <h4>{{ completedEvents() }}</h4>
+            <p>Realizados</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="globe" /></span>
+          <div class="stat-info">
+            <h4>{{ publicEvents() }}</h4>
+            <p>Públicos</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <span class="search-icon"><app-icon name="search" /></span>
+          <input
+            type="text"
+            placeholder="Buscar evento..."
+            [(ngModel)]="searchQuery"
+            (input)="applyFilters()"
+          >
+        </div>
+        <div class="filter-group">
+          <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+            <option value="all">Todos los tipos</option>
+            <option value="congreso">Congreso</option>
+            <option value="seminario">Seminario</option>
+            <option value="taller">Taller</option>
+            <option value="conferencia">Conferencia</option>
+            <option value="webinar">Webinar</option>
+            <option value="reunion">Reunión</option>
+          </select>
+          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="all">Todos los estados</option>
+            <option value="borrador">Borrador</option>
+            <option value="publicado">Publicado</option>
+            <option value="en_curso">En curso</option>
+            <option value="finalizado">Finalizado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div class="view-toggle">
+          <button
+            class="view-btn"
+            [class.active]="viewMode() === 'grid'"
+            (click)="viewMode.set('grid')"
+          ><app-icon name="grid" [size]="16" /></button>
+          <button
+            class="view-btn"
+            [class.active]="viewMode() === 'list'"
+            (click)="viewMode.set('list')"
+          ><app-icon name="list" [size]="16" /></button>
+        </div>
+      </div>
+
+      <!-- Events Grid/List -->
+      <div class="events-container" [class.grid-view]="viewMode() === 'grid'">
+        @for (event of filteredEvents(); track event.id) {
+          <div class="event-card" [class]="event.status">
+            <div class="event-image">
+              @if (event.bannerUrl) {
+                <img [src]="event.bannerUrl" [alt]="event.title">
+              } @else {
+                <div class="image-placeholder">
+                  <span>{{ getEventTypeIcon(event.type) }}</span>
+                </div>
+              }
+              <span class="type-badge" [class]="event.type">
+                {{ getEventTypeLabel(event.type) }}
+              </span>
+            </div>
+
+            <div class="event-content">
+              <div class="event-date">
+                <span class="date-icon"><app-icon name="calendar" [size]="14" /></span>
+                <span>{{ formatDateRange(event.startDate, event.endDate) }}</span>
+              </div>
+
+              <h4>{{ event.title }}</h4>
+
+              @if (event.description) {
+                <p class="event-description">{{ event.description | slice:0:120 }}...</p>
+              }
+
+              <div class="event-meta">
+                <span class="meta-item">
+                  <span class="meta-icon"><app-icon name="map-pin" [size]="14" /></span>
+                  {{ event.location }}
+                </span>
+                @if (event.modality) {
+                  <span class="meta-item">
+                    <span class="meta-icon"><app-icon name="monitor" [size]="14" /></span>
+                    {{ getModalityLabel(event.modality) }}
+                  </span>
+                }
+              </div>
+
+              @if (event.registeredCount) {
+                <div class="registrations">
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill"
+                      [style.width.%]="getRegistrationProgress(event)"
+                    ></div>
+                  </div>
+                  <span class="registration-text">
+                    {{ event.registeredCount }}/{{ event.capacity || '∞' }} inscritos
+                  </span>
+                </div>
+              }
+            </div>
+
+            <div class="event-footer">
+              <div class="status-section">
+                <span class="status-badge" [class]="event.status">
+                  {{ getStatusLabel(event.status) }}
+                </span>
+                <div class="visibility-toggle">
+                  <label class="switch">
+                    <input
+                      type="checkbox"
+                      [checked]="event.isPublic"
+                      (change)="toggleVisibility(event)"
+                    >
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="action-buttons">
+                @if (event.registrationUrl) {
+                  <a [href]="event.registrationUrl" target="_blank" class="action-btn register" title="Inscripción"><app-icon name="link" [size]="16" /></a>
+                }
+                <button class="action-btn" title="Editar" (click)="editEvent(event)"><app-icon name="edit" [size]="16" /></button>
+                <button class="action-btn delete" title="Eliminar" (click)="deleteEvent(event)"><app-icon name="trash" [size]="16" /></button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="empty-icon"><app-icon name="calendar" [size]="48" /></span>
+            <h3>No hay eventos registrados</h3>
+            <p>Crea el primer evento del foro</p>
+            <button class="btn-primary" (click)="openModal()">
+              Crear evento
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Modal -->
+      @if (showModal()) {
+        <div class="modal-overlay" (click)="closeModal()">
+          <div class="modal modal-lg" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ editingEvent() ? 'Editar evento' : 'Nuevo evento' }}</h3>
+              <button class="close-btn" (click)="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+              <form (ngSubmit)="saveEvent()">
+                <div class="form-section">
+                  <h4>Información del Evento</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Tipo de evento *</label>
+                      <select [(ngModel)]="formData.type" name="type" required>
+                        <option value="congreso">Congreso</option>
+                        <option value="seminario">Seminario</option>
+                        <option value="taller">Taller</option>
+                        <option value="conferencia">Conferencia</option>
+                        <option value="webinar">Webinar</option>
+                        <option value="reunion">Reunión</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Estado *</label>
+                      <select [(ngModel)]="formData.status" name="status" required>
+                        <option value="borrador">Borrador</option>
+                        <option value="publicado">Publicado</option>
+                        <option value="en_curso">En curso</option>
+                        <option value="finalizado">Finalizado</option>
+                        <option value="cancelado">Cancelado</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Título *</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.title"
+                      name="title"
+                      placeholder="III Congreso Nacional GIRD-ACC"
+                      required
+                    >
+                  </div>
+
+                  <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea
+                      [(ngModel)]="formData.description"
+                      name="description"
+                      rows="3"
+                      placeholder="Descripción del evento..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Fecha y Lugar</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Fecha inicio *</label>
+                      <input
+                        type="datetime-local"
+                        [(ngModel)]="formData.startDate"
+                        name="startDate"
+                        required
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Fecha fin</label>
+                      <input
+                        type="datetime-local"
+                        [(ngModel)]="formData.endDate"
+                        name="endDate"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Modalidad</label>
+                      <select [(ngModel)]="formData.modality" name="modality">
+                        <option value="presencial">Presencial</option>
+                        <option value="virtual">Virtual</option>
+                        <option value="hibrida">Híbrida</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Capacidad</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="formData.capacity"
+                        name="capacity"
+                        min="0"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Ubicación *</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.location"
+                      name="location"
+                      placeholder="Auditorio Principal, Universidad..."
+                      required
+                    >
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Enlaces y Media</h4>
+                  <div class="form-group">
+                    <label>URL de banner/imagen</label>
+                    <input
+                      type="url"
+                      [(ngModel)]="formData.bannerUrl"
+                      name="bannerUrl"
+                      placeholder="https://..."
+                    >
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>URL de inscripción</label>
+                      <input
+                        type="url"
+                        [(ngModel)]="formData.registrationUrl"
+                        name="registrationUrl"
+                        placeholder="https://..."
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Enlace virtual</label>
+                      <input
+                        type="url"
+                        [(ngModel)]="formData.virtualLink"
+                        name="virtualLink"
+                        placeholder="https://zoom.us/..."
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="checkbox-group">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                    Visible en la web pública
+                  </label>
+                  <label>
+                    <input type="checkbox" [(ngModel)]="formData.requiresRegistration" name="requiresRegistration">
+                    Requiere inscripción previa
+                  </label>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                  <button type="submit" class="btn-primary">
+                    {{ editingEvent() ? 'Guardar cambios' : 'Crear evento' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      }
+    </div>

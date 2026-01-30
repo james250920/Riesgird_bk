@@ -1,0 +1,333 @@
+<div class="researchers-management">
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Investigadores GIRD-ACC</h2>
+      <p>Directorio de investigadores de la red interuniversitaria.</p>
+    </div>
+    <button class="btn-primary" (click)="openModal()">
+      <app-icon name="plus" [size]="18" /> Nuevo Investigador
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-icon"><app-icon name="research" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ researchers().length }}</h4>
+        <p>Investigadores</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icon name="graduation" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ doctorates() }}</h4>
+        <p>Doctorados</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icon name="university" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ universities().length }}</h4>
+        <p>Universidades</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icon name="book" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ totalPublications() }}</h4>
+        <p>Publicaciones</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <span class="search-icon"><app-icon name="search" [size]="18" /></span>
+      <input
+        type="text"
+        placeholder="Buscar investigador..."
+        [(ngModel)]="searchQuery"
+        (input)="applyFilters()"
+      >
+    </div>
+    <div class="filter-group">
+      <select [(ngModel)]="universityFilter" (change)="applyFilters()">
+        <option value="all">Todas las universidades</option>
+        @for (uni of universities(); track uni.id) {
+          <option [value]="uni.id">{{ uni.shortName }}</option>
+        }
+      </select>
+      <select [(ngModel)]="areaFilter" (change)="applyFilters()">
+        <option value="all">Todas las áreas</option>
+        @for (area of researchAreas; track area) {
+          <option [value]="area">{{ area }}</option>
+        }
+      </select>
+      <select [(ngModel)]="degreeFilter" (change)="applyFilters()">
+        <option value="all">Todos los grados</option>
+        <option value="doctor">Doctor</option>
+        <option value="magister">Magíster</option>
+        <option value="licenciado">Licenciado</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Researchers Grid -->
+  <div class="researchers-grid">
+    @for (researcher of filteredResearchers(); track researcher.id) {
+      <div class="researcher-card">
+        <div class="researcher-photo">
+          @if (researcher.photoUrl) {
+            <img [src]="researcher.photoUrl" [alt]="researcher.fullName">
+          } @else {
+            <div class="photo-placeholder">
+              {{ getInitials(researcher.fullName) }}
+            </div>
+          }
+          <span class="degree-badge" [class]="researcher.academicDegree">
+            {{ getDegreeLabel(researcher.academicDegree) }}
+          </span>
+        </div>
+
+        <div class="researcher-info">
+          <h4>{{ researcher.fullName }}</h4>
+          <p class="university">{{ getUniversityName(researcher.universityId) }}</p>
+
+          <div class="researcher-meta">
+            @if (researcher.researchAreas && researcher.researchAreas.length) {
+              <div class="research-areas">
+                @for (area of researcher.researchAreas.slice(0, 2); track area) {
+                  <span class="area-tag">{{ area }}</span>
+                }
+                @if (researcher.researchAreas.length > 2) {
+                  <span class="more-areas">+{{ researcher.researchAreas.length - 2 }}</span>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="researcher-stats">
+            @if (researcher.publicationsCount) {
+              <span class="stat"><app-icon name="book" [size]="14" /> {{ researcher.publicationsCount }} publicaciones</span>
+            }
+            @if (researcher.orcid) {
+              <span class="stat orcid">
+                <a [href]="'https://orcid.org/' + researcher.orcid" target="_blank">ORCID</a>
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="researcher-actions">
+          <div class="visibility-toggle">
+            <label class="switch">
+              <input
+                type="checkbox"
+                [checked]="researcher.isPublic"
+                (change)="toggleVisibility(researcher)"
+              >
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="action-buttons">
+            <button class="action-btn" title="Ver perfil" (click)="viewProfile(researcher)"><app-icon name="eye" [size]="16" /></button>
+            <button class="action-btn" title="Editar" (click)="editResearcher(researcher)"><app-icon name="edit" [size]="16" /></button>
+            <button class="action-btn delete" title="Eliminar" (click)="deleteResearcher(researcher)"><app-icon name="trash" [size]="16" /></button>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <span class="empty-icon"><app-icon name="research" [size]="48" /></span>
+        <h3>No hay investigadores registrados</h3>
+        <p>Registra el primer investigador de la red</p>
+        <button class="btn-primary" (click)="openModal()">
+          Añadir investigador
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Modal -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editingResearcher() ? 'Editar investigador' : 'Nuevo investigador' }}</h3>
+          <button class="close-btn" (click)="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="saveResearcher()">
+            <div class="form-section">
+              <h4>Datos Personales</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Nombre completo *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.fullName"
+                    name="fullName"
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Grado académico *</label>
+                  <select [(ngModel)]="formData.academicDegree" name="academicDegree" required>
+                    <option value="doctor">Doctor</option>
+                    <option value="magister">Magíster</option>
+                    <option value="licenciado">Licenciado</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Email *</label>
+                  <input
+                    type="email"
+                    [(ngModel)]="formData.email"
+                    name="email"
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Teléfono</label>
+                  <input
+                    type="tel"
+                    [(ngModel)]="formData.phone"
+                    name="phone"
+                  >
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>URL de foto</label>
+                <input
+                  type="url"
+                  [(ngModel)]="formData.photoUrl"
+                  name="photoUrl"
+                >
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Afiliación Institucional</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Universidad *</label>
+                  <select [(ngModel)]="formData.universityId" name="universityId" required>
+                    @for (uni of universities(); track uni.id) {
+                      <option [value]="uni.id">{{ uni.name }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Facultad</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.faculty"
+                    name="faculty"
+                  >
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Departamento/Escuela</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.department"
+                  name="department"
+                >
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Investigación</h4>
+              <div class="form-group">
+                <label>Áreas de investigación</label>
+                <div class="tags-input">
+                  @for (area of formData.researchAreas; track area; let i = $index) {
+                    <span class="tag">
+                      {{ area }}
+                      <button type="button" (click)="removeArea(i)">×</button>
+                    </span>
+                  }
+                  <input
+                    type="text"
+                    placeholder="Agregar área..."
+                    (keydown.enter)="addArea($event)"
+                  >
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>ORCID</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.orcid"
+                    name="orcid"
+                    placeholder="0000-0000-0000-0000"
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Scopus ID</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.scopusId"
+                    name="scopusId"
+                  >
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Google Scholar</label>
+                  <input
+                    type="url"
+                    [(ngModel)]="formData.googleScholar"
+                    name="googleScholar"
+                  >
+                </div>
+                <div class="form-group">
+                  <label>N° Publicaciones</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="formData.publicationsCount"
+                    name="publicationsCount"
+                    min="0"
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Biografía</label>
+              <textarea
+                [(ngModel)]="formData.bio"
+                name="bio"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <div class="checkbox-group">
+              <label>
+                <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                Visible en directorio público
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+              <button type="submit" class="btn-primary">
+                {{ editingResearcher() ? 'Guardar cambios' : 'Crear investigador' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>

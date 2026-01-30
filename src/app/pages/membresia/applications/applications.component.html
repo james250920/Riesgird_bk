@@ -1,0 +1,267 @@
+<div class="applications-management">
+      <div class="page-header">
+        <div class="header-content">
+          <h2>Solicitudes de Membresía</h2>
+          <p>Gestiona las solicitudes de adscripción de universidades.</p>
+        </div>
+        <button class="btn-primary" (click)="openModal()">
+          <app-icon name="plus" [size]="18" /> Nueva Solicitud
+        </button>
+      </div>
+
+      <!-- Pipeline Stats -->
+      <div class="pipeline-stats">
+        @for (stage of pipelineStages; track stage.status) {
+          <div
+            class="pipeline-stage"
+            [class]="stage.status"
+            [class.active]="statusFilter === stage.status"
+            (click)="filterByStatus(stage.status)"
+          >
+            <span class="stage-icon"><app-icon [name]="stage.icon" [size]="24" /></span>
+            <span class="stage-count">{{ getStatusCount(stage.status) }}</span>
+            <span class="stage-label">{{ stage.label }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <span class="search-icon"><app-icon name="search" [size]="16" /></span>
+          <input
+            type="text"
+            placeholder="Buscar solicitud..."
+            [(ngModel)]="searchQuery"
+            (input)="applyFilters()"
+          >
+        </div>
+        <div class="filter-group">
+          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="all">Todos los estados</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="en_revision">En revisión</option>
+            <option value="documentacion_incompleta">Doc. incompleta</option>
+            <option value="aprobada">Aprobada</option>
+            <option value="rechazada">Rechazada</option>
+          </select>
+          <button class="btn-filter" [class.active]="showUrgent" (click)="toggleUrgent()">
+            <app-icon name="flame" [size]="16" /> Urgentes
+          </button>
+        </div>
+      </div>
+
+      <!-- Applications List -->
+      <div class="applications-list">
+        @for (application of filteredApplications(); track application.id) {
+          <div class="application-card" [class]="application.status">
+            <div class="application-header">
+              <div class="university-info">
+                <h4>{{ application.universityName }}</h4>
+                <p>Solicitud: {{ application.applicationNumber }}</p>
+              </div>
+              <div class="status-section">
+                <span class="status-badge" [class]="application.status">
+                  {{ getStatusLabel(application.status) }}
+                </span>
+                @if (isOverdue(application)) {
+                  <span class="overdue-badge"><app-icon name="clock" [size]="14" /> Vencida</span>
+                }
+              </div>
+            </div>
+
+            <div class="application-body">
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Solicitante</span>
+                  <span class="info-value">{{ application.contactName }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Email</span>
+                  <span class="info-value">{{ application.contactEmail }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Teléfono</span>
+                  <span class="info-value">{{ application.contactPhone || 'No especificado' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Fecha solicitud</span>
+                  <span class="info-value">{{ application.submittedAt ? formatDate(application.submittedAt) : 'No enviada' }}</span>
+                </div>
+              </div>
+
+              <!-- Documents Progress -->
+              <div class="documents-section">
+                <h5>Documentación ({{ application.documents.length }} archivos)</h5>
+                <div class="documents-progress">
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill"
+                      [style.width.%]="getDocumentsProgress(application)"
+                    ></div>
+                  </div>
+                  <span class="progress-text">{{ getDocumentsProgress(application) }}% completo</span>
+                </div>
+              </div>
+
+              @if (application.notes) {
+                <div class="notes-section">
+                  <h5>Notas</h5>
+                  <p>{{ application.notes }}</p>
+                </div>
+              }
+            </div>
+
+            <div class="application-footer">
+              <div class="assignee">
+                @if (application.assignedTo) {
+                  <span><app-icon name="user" [size]="16" /> {{ application.assignedTo }}</span>
+                } @else {
+                  <button class="btn-assign" (click)="assignApplication(application)">
+                    Asignar revisor
+                  </button>
+                }
+              </div>
+              <div class="actions">
+                <button class="action-btn" title="Ver detalles" (click)="viewDetails(application)"><app-icon name="eye" /></button>
+                @if (application.status === 'recibida') {
+                  <button class="action-btn review" title="Iniciar revisión" (click)="startReview(application)"><app-icon name="clipboard" /></button>
+                }
+                @if (application.status === 'en_revision') {
+                  <button class="action-btn approve" title="Aprobar" (click)="approveApplication(application)"><app-icon name="check-circle" /></button>
+                  <button class="action-btn reject" title="Rechazar" (click)="rejectApplication(application)"><app-icon name="x-circle" /></button>
+                  <button class="action-btn incomplete" title="Doc. incompleta" (click)="markIncomplete(application)"><app-icon name="file-text" /></button>
+                }
+                <button class="action-btn edit" title="Editar" (click)="editApplication(application)"><app-icon name="edit" [size]="16" /></button>
+                <button class="action-btn delete" title="Eliminar" (click)="deleteApplication(application)"><app-icon name="trash" [size]="16" /></button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="empty-icon"><app-icon name="clipboard" [size]="48" /></span>
+            <h3>No hay solicitudes</h3>
+            <p>{{ searchQuery ? 'Intenta con otra búsqueda' : 'No hay solicitudes de membresía pendientes' }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Modal -->
+      @if (showModal()) {
+        <div class="modal-overlay" (click)="closeModal()">
+          <div class="modal modal-lg" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ editingApplication() ? 'Editar solicitud' : 'Nueva solicitud' }}</h3>
+              <button class="close-btn" (click)="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+              <form (ngSubmit)="saveApplication()">
+                <div class="form-section">
+                  <h4>Información de la Universidad</h4>
+                  <div class="form-group">
+                    <label>Nombre de la Universidad *</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.universityName"
+                      name="universityName"
+                      placeholder="Universidad Nacional..."
+                      required
+                    >
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Información de Contacto</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Nombre del contacto *</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="formData.contactName"
+                        name="contactName"
+                        placeholder="Dr. Juan Pérez"
+                        required
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Cargo</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="formData.contactPosition"
+                        name="contactPosition"
+                        placeholder="Rector"
+                      >
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Email *</label>
+                      <input
+                        type="email"
+                        [(ngModel)]="formData.contactEmail"
+                        name="contactEmail"
+                        placeholder="rector@universidad.edu.pe"
+                        required
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Teléfono</label>
+                      <input
+                        type="tel"
+                        [(ngModel)]="formData.contactPhone"
+                        name="contactPhone"
+                        placeholder="+51 999 999 999"
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Estado y Asignación</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Estado</label>
+                      <select [(ngModel)]="formData.status" name="status">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en_revision">En revisión</option>
+                        <option value="documentacion_incompleta">Documentación incompleta</option>
+                        <option value="aprobada">Aprobada</option>
+                        <option value="rechazada">Rechazada</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Asignado a</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="formData.assignedTo"
+                        name="assignedTo"
+                        placeholder="Nombre del revisor"
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Notas</h4>
+                  <div class="form-group">
+                    <textarea
+                      [(ngModel)]="formData.notes"
+                      name="notes"
+                      rows="3"
+                      placeholder="Observaciones sobre la solicitud..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                  <button type="submit" class="btn-primary">
+                    {{ editingApplication() ? 'Guardar cambios' : 'Registrar solicitud' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      }
+    </div>

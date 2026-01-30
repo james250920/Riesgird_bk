@@ -1,0 +1,353 @@
+<div class="assemblies-management">
+      <div class="page-header">
+        <div class="header-content">
+          <h2>Asambleas Generales</h2>
+          <p>Gestión de asambleas, actas y acuerdos de la red.</p>
+        </div>
+        <button class="btn-primary" (click)="openModal()">
+          <app-icon name="plus" [size]="18" /> Nueva Asamblea
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="assembly" /></span>
+          <div class="stat-info">
+            <h4>{{ assemblies().length }}</h4>
+            <p>Total asambleas</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="check-circle" /></span>
+          <div class="stat-info">
+            <h4>{{ completedAssemblies() }}</h4>
+            <p>Realizadas</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="calendar" /></span>
+          <div class="stat-info">
+            <h4>{{ scheduledAssemblies() }}</h4>
+            <p>Programadas</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="file-text" /></span>
+          <div class="stat-info">
+            <h4>{{ totalAgreements() }}</h4>
+            <p>Acuerdos</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <span class="search-icon"><app-icon name="search" /></span>
+          <input
+            type="text"
+            placeholder="Buscar asamblea..."
+            [(ngModel)]="searchQuery"
+            (input)="applyFilters()"
+          >
+        </div>
+        <div class="filter-group">
+          <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+            <option value="all">Todos los tipos</option>
+            <option value="ordinaria">Ordinaria</option>
+            <option value="extraordinaria">Extraordinaria</option>
+          </select>
+          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="all">Todos los estados</option>
+            <option value="programada">Programada</option>
+            <option value="en_curso">En curso</option>
+            <option value="completada">Completada</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+          <select [(ngModel)]="yearFilter" (change)="applyFilters()">
+            <option value="all">Todos los años</option>
+            @for (year of availableYears(); track year) {
+              <option [value]="year">{{ year }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Assemblies Timeline -->
+      <div class="assemblies-timeline">
+        @for (assembly of filteredAssemblies(); track assembly.id) {
+          <div class="assembly-card" [class]="assembly.status">
+            <div class="assembly-date-section">
+              <div class="date-badge" [class]="assembly.type">
+                <span class="date-day">{{ getDay(assembly.date) }}</span>
+                <span class="date-month">{{ getMonth(assembly.date) }}</span>
+                <span class="date-year">{{ getYear(assembly.date) }}</span>
+              </div>
+              <span class="assembly-number">{{ assembly.number }}</span>
+            </div>
+
+            <div class="assembly-content">
+              <div class="assembly-header">
+                <div class="title-section">
+                  <h4>{{ assembly.title }}</h4>
+                  <div class="badges">
+                    <span class="type-badge" [class]="assembly.type">
+                      @if (assembly.type === 'ordinaria') {
+                        <app-icon name="file-text" [size]="14" /> Ordinaria
+                      } @else {
+                        <app-icon name="lightning" [size]="14" /> Extraordinaria
+                      }
+                    </span>
+                    <span class="status-badge" [class]="assembly.status">
+                      {{ getStatusLabel(assembly.status) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="assembly-details">
+                <div class="detail-item">
+                  <span class="detail-icon"><app-icon name="map-pin" [size]="16" /></span>
+                  <span>{{ assembly.location }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-icon"><app-icon name="clock" [size]="16" /></span>
+                  <span>{{ formatTime(assembly.date) }}</span>
+                </div>
+                @if (assembly.modality) {
+                  <div class="detail-item">
+                    <span class="detail-icon"><app-icon name="monitor" [size]="16" /></span>
+                    <span>{{ getModalityLabel(assembly.modality) }}</span>
+                  </div>
+                }
+                @if (assembly.attendeesCount) {
+                  <div class="detail-item">
+                    <span class="detail-icon"><app-icon name="users" [size]="16" /></span>
+                    <span>{{ assembly.attendeesCount }} asistentes</span>
+                  </div>
+                }
+              </div>
+
+              @if (assembly.agendaItems && assembly.agendaItems.length > 0) {
+                <div class="agenda-preview">
+                  <h5>Agenda ({{ assembly.agendaItems.length }} puntos)</h5>
+                  <ul>
+                    @for (item of assembly.agendaItems.slice(0, 3); track item.id) {
+                      <li>{{ item.title }}</li>
+                    }
+                    @if (assembly.agendaItems.length > 3) {
+                      <li class="more">+{{ assembly.agendaItems.length - 3 }} más...</li>
+                    }
+                  </ul>
+                </div>
+              }
+
+              @if (assembly.agreements && assembly.agreements.length > 0) {
+                <div class="agreements-preview">
+                  <h5><app-icon name="file-text" [size]="14" /> {{ assembly.agreements.length }} acuerdos registrados</h5>
+                </div>
+              }
+            </div>
+
+            <div class="assembly-actions">
+              <div class="visibility-toggle">
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    [checked]="assembly.isPublic"
+                    (change)="toggleVisibility(assembly)"
+                  >
+                  <span class="slider"></span>
+                </label>
+                <span class="toggle-label">{{ assembly.isPublic ? 'Público' : 'Privado' }}</span>
+              </div>
+              <div class="action-buttons">
+                @if (assembly.minutesUrl) {
+                  <a [href]="assembly.minutesUrl" target="_blank" class="action-btn" title="Ver acta"><app-icon name="file" [size]="16" /></a>
+                }
+                <button class="action-btn" title="Ver detalles" (click)="viewDetails(assembly)"><app-icon name="eye" [size]="16" /></button>
+                <button class="action-btn" title="Editar" (click)="editAssembly(assembly)"><app-icon name="edit" [size]="16" /></button>
+                <button class="action-btn delete" title="Eliminar" (click)="deleteAssembly(assembly)"><app-icon name="trash" [size]="16" /></button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="empty-icon"><app-icon name="assembly" [size]="48" /></span>
+            <h3>No hay asambleas registradas</h3>
+            <p>Registra la primera asamblea de la red</p>
+            <button class="btn-primary" (click)="openModal()">
+              Crear asamblea
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Modal -->
+      @if (showModal()) {
+        <div class="modal-overlay" (click)="closeModal()">
+          <div class="modal modal-lg" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ editingAssembly() ? 'Editar asamblea' : 'Nueva asamblea' }}</h3>
+              <button class="close-btn" (click)="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+              <form (ngSubmit)="saveAssembly()">
+                <div class="form-section">
+                  <h4>Información General</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Número de asamblea *</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="formData.number"
+                        name="number"
+                        placeholder="AG-2024-001"
+                        required
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Tipo *</label>
+                      <select [(ngModel)]="formData.type" name="type" required>
+                        <option value="ordinaria">Ordinaria</option>
+                        <option value="extraordinaria">Extraordinaria</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Título *</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.title"
+                      name="title"
+                      placeholder="Asamblea General Ordinaria 2024"
+                      required
+                    >
+                  </div>
+
+                  <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea
+                      [(ngModel)]="formData.description"
+                      name="description"
+                      rows="2"
+                      placeholder="Descripción de la asamblea..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Fecha y Lugar</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Fecha y hora *</label>
+                      <input
+                        type="datetime-local"
+                        [(ngModel)]="formData.date"
+                        name="date"
+                        required
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Modalidad</label>
+                      <select [(ngModel)]="formData.modality" name="modality">
+                        <option value="presencial">Presencial</option>
+                        <option value="virtual">Virtual</option>
+                        <option value="hibrida">Híbrida</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Lugar *</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.location"
+                      name="location"
+                      placeholder="Sala de reuniones, Universidad..."
+                      required
+                    >
+                  </div>
+
+                  @if (formData.modality !== 'presencial') {
+                    <div class="form-group">
+                      <label>Enlace virtual</label>
+                      <input
+                        type="url"
+                        [(ngModel)]="formData.virtualLink"
+                        name="virtualLink"
+                        placeholder="https://zoom.us/..."
+                      >
+                    </div>
+                  }
+                </div>
+
+                <div class="form-section">
+                  <h4>Documentos</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>URL de convocatoria</label>
+                      <input
+                        type="url"
+                        [(ngModel)]="formData.convocationUrl"
+                        name="convocationUrl"
+                        placeholder="https://..."
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>URL del acta</label>
+                      <input
+                        type="url"
+                        [(ngModel)]="formData.minutesUrl"
+                        name="minutesUrl"
+                        placeholder="https://..."
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Estado y Visibilidad</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Estado *</label>
+                      <select [(ngModel)]="formData.status" name="status" required>
+                        <option value="programada">Programada</option>
+                        <option value="en_curso">En curso</option>
+                        <option value="completada">Completada</option>
+                        <option value="cancelada">Cancelada</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>N° de asistentes</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="formData.attendeesCount"
+                        name="attendeesCount"
+                        min="0"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="checkbox-group">
+                    <label>
+                      <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                      Visible en la web pública
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                  <button type="submit" class="btn-primary">
+                    {{ editingAssembly() ? 'Guardar cambios' : 'Crear asamblea' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      }
+    </div>

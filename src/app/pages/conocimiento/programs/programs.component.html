@@ -1,0 +1,348 @@
+<div class="programs-management">
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Programas de Especialización</h2>
+      <p>Gestión de programas formativos en GIRD-ACC.</p>
+    </div>
+    <button class="btn-primary" (click)="openModal()">
+      <app-icon name="plus" [size]="18" /> Nuevo Programa
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-icon"><app-icon name="book" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ programs().length }}</h4>
+        <p>Programas</p>
+      </div>
+    </div>
+    <div class="stat-card active">
+      <span class="stat-icon"><app-icon name="check-circle" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ activePrograms() }}</h4>
+        <p>Activos</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icon name="graduation" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ totalGraduates() }}</h4>
+        <p>Egresados</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icon name="file-text" [size]="24" /></span>
+      <div class="stat-info">
+        <h4>{{ openEnrollments() }}</h4>
+        <p>Inscripciones abiertas</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <span class="search-icon"><app-icon name="search" [size]="18" /></span>
+      <input
+        type="text"
+        placeholder="Buscar programa..."
+        [(ngModel)]="searchQuery"
+        (input)="applyFilters()"
+      >
+    </div>
+    <div class="filter-group">
+      <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+        <option value="all">Todos los tipos</option>
+        <option value="diplomado">Diplomado</option>
+        <option value="especializacion">Especialización</option>
+        <option value="maestria">Maestría</option>
+        <option value="curso">Curso</option>
+        <option value="taller">Taller</option>
+      </select>
+      <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+        <option value="all">Todos los estados</option>
+        <option value="activo">Activo</option>
+        <option value="proximo">Próximo</option>
+        <option value="finalizado">Finalizado</option>
+      </select>
+      <select [(ngModel)]="modalityFilter" (change)="applyFilters()">
+        <option value="all">Todas las modalidades</option>
+        <option value="presencial">Presencial</option>
+        <option value="virtual">Virtual</option>
+        <option value="hibrida">Híbrida</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Programs Grid -->
+  <div class="programs-grid">
+    @for (program of filteredPrograms(); track program.id) {
+      <div class="program-card">
+        <div class="program-banner">
+          @if (program.imageUrl) {
+            <img [src]="program.imageUrl" [alt]="program.name">
+          } @else {
+            <div class="banner-placeholder">
+              <span>{{ getProgramTypeIcon(program.type) }}</span>
+            </div>
+          }
+          <div class="program-badges">
+            <span class="type-badge">{{ getProgramTypeLabel(program.type) }}</span>
+            <span class="status-badge" [class]="program.status">{{ getStatusLabel(program.status) }}</span>
+          </div>
+        </div>
+
+        <div class="program-content">
+          <h4>{{ program.name }}</h4>
+
+          @if (program.description) {
+            <p class="program-description">{{ program.description | slice:0:100 }}...</p>
+          }
+
+          <div class="program-meta">
+            <div class="meta-item">
+              <span class="meta-icon"><app-icon name="clock" [size]="14" /></span>
+              <span>{{ program.duration }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon"><app-icon name="monitor" [size]="14" /></span>
+              <span>{{ getModalityLabel(program.modality) }}</span>
+            </div>
+            @if (program.credits) {
+              <div class="meta-item">
+                <span class="meta-icon"><app-icon name="chart" [size]="14" /></span>
+                <span>{{ program.credits }} créditos</span>
+              </div>
+            }
+          </div>
+
+          @if (program.startDate) {
+            <div class="dates">
+              <span class="date-label">Inicio:</span>
+              <span class="date-value">{{ formatDate(program.startDate) }}</span>
+            </div>
+          }
+
+          @if (program.price) {
+            <div class="price">
+              <span class="price-value">S/ {{ program.price | number }}</span>
+              @if (program.enrollmentOpen) {
+                <span class="enrollment-open">Inscripciones abiertas</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="program-footer">
+          <div class="footer-left">
+            <div class="visibility-toggle">
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  [checked]="program.isPublic"
+                  (change)="toggleVisibility(program)"
+                >
+                <span class="slider"></span>
+              </label>
+            </div>
+            @if (program.graduatesCount) {
+              <span class="graduates"><app-icon name="graduation" [size]="14" /> {{ program.graduatesCount }} egresados</span>
+            }
+          </div>
+          <div class="action-buttons">
+            @if (program.syllabusUrl) {
+              <a [href]="program.syllabusUrl" target="_blank" class="action-btn" title="Syllabus"><app-icon name="file" [size]="16" /></a>
+            }
+            <button class="action-btn" title="Editar" (click)="editProgram(program)"><app-icon name="edit" [size]="16" /></button>
+            <button class="action-btn delete" title="Eliminar" (click)="deleteProgram(program)"><app-icon name="trash" [size]="16" /></button>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <span class="empty-icon"><app-icon name="book" [size]="48" /></span>
+        <h3>No hay programas registrados</h3>
+        <p>Crea el primer programa de especialización</p>
+        <button class="btn-primary" (click)="openModal()">
+          Crear programa
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Modal -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editingProgram() ? 'Editar programa' : 'Nuevo programa' }}</h3>
+          <button class="close-btn" (click)="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="saveProgram()">
+            <div class="form-section">
+              <h4>Información del Programa</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Tipo *</label>
+                  <select [(ngModel)]="formData.type" name="type" required>
+                    <option value="diplomado">Diplomado</option>
+                    <option value="especializacion">Especialización</option>
+                    <option value="maestria">Maestría</option>
+                    <option value="curso">Curso</option>
+                    <option value="taller">Taller</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Estado *</label>
+                  <select [(ngModel)]="formData.status" name="status" required>
+                    <option value="activo">Activo</option>
+                    <option value="proximo">Próximo</option>
+                    <option value="finalizado">Finalizado</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Nombre del programa *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.name"
+                  name="name"
+                  required
+                >
+              </div>
+
+              <div class="form-group">
+                <label>Descripción</label>
+                <textarea
+                  [(ngModel)]="formData.description"
+                  name="description"
+                  rows="3"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Detalles Académicos</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Duración *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.duration"
+                    name="duration"
+                    placeholder="6 meses, 120 horas..."
+                    required
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Créditos</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="formData.credits"
+                    name="credits"
+                    min="0"
+                  >
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Modalidad</label>
+                  <select [(ngModel)]="formData.modality" name="modality">
+                    <option value="presencial">Presencial</option>
+                    <option value="virtual">Virtual</option>
+                    <option value="hibrida">Híbrida</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Precio (S/)</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="formData.price"
+                    name="price"
+                    min="0"
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Fechas</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Fecha de inicio</label>
+                  <input
+                    type="date"
+                    [(ngModel)]="formData.startDate"
+                    name="startDate"
+                  >
+                </div>
+                <div class="form-group">
+                  <label>Fecha de fin</label>
+                  <input
+                    type="date"
+                    [(ngModel)]="formData.endDate"
+                    name="endDate"
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>Enlaces y Media</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>URL de imagen</label>
+                  <input
+                    type="url"
+                    [(ngModel)]="formData.imageUrl"
+                    name="imageUrl"
+                  >
+                </div>
+                <div class="form-group">
+                  <label>URL del syllabus</label>
+                  <input
+                    type="url"
+                    [(ngModel)]="formData.syllabusUrl"
+                    name="syllabusUrl"
+                  >
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>URL de inscripción</label>
+                <input
+                  type="url"
+                  [(ngModel)]="formData.registrationUrl"
+                  name="registrationUrl"
+                >
+              </div>
+            </div>
+
+            <div class="checkbox-group">
+              <label>
+                <input type="checkbox" [(ngModel)]="formData.enrollmentOpen" name="enrollmentOpen">
+                Inscripciones abiertas
+              </label>
+              <label>
+                <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                Visible en web pública
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+              <button type="submit" class="btn-primary">
+                {{ editingProgram() ? 'Guardar cambios' : 'Crear programa' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,233 @@
+<div class="calendar-management">
+      <div class="page-header">
+        <div class="header-content">
+          <h2>Calendario de Eventos</h2>
+          <p>Vista unificada de todos los eventos de la red.</p>
+        </div>
+        <button class="btn-primary" (click)="openModal()">
+          <app-icon name="plus" [size]="18" /> Nuevo Evento
+        </button>
+      </div>
+
+      <!-- Calendar Navigation -->
+      <div class="calendar-header">
+        <div class="month-navigation">
+          <button class="nav-btn" (click)="previousMonth()"><app-icon name="chevron-left" [size]="16" /></button>
+          <h3>{{ currentMonthName() }} {{ currentYear() }}</h3>
+          <button class="nav-btn" (click)="nextMonth()"><app-icon name="chevron-right" [size]="16" /></button>
+        </div>
+        <div class="header-actions">
+          <button class="btn-today" (click)="goToToday()">Hoy</button>
+          <div class="view-toggle">
+            <button
+              class="view-btn"
+              [class.active]="viewMode() === 'month'"
+              (click)="viewMode.set('month')"
+            >Mes</button>
+            <button
+              class="view-btn"
+              [class.active]="viewMode() === 'list'"
+              (click)="viewMode.set('list')"
+            >Lista</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <span class="legend-item asamblea"><span class="dot"></span>Asambleas</span>
+        <span class="legend-item evento"><span class="dot"></span>Eventos Foro</span>
+        <span class="legend-item general"><span class="dot"></span>Generales</span>
+      </div>
+
+      @if (viewMode() === 'month') {
+        <!-- Calendar Grid -->
+        <div class="calendar-grid">
+          <div class="weekday-header">
+            @for (day of weekdays; track day) {
+              <div class="weekday">{{ day }}</div>
+            }
+          </div>
+          <div class="days-grid">
+            @for (day of calendarDays(); track day.date) {
+              <div
+                class="day-cell"
+                [class.other-month]="!day.isCurrentMonth"
+                [class.today]="day.isToday"
+                [class.has-events]="day.events.length > 0"
+                (click)="selectDay(day)"
+              >
+                <span class="day-number">{{ day.day }}</span>
+                <div class="day-events">
+                  @for (event of day.events.slice(0, 3); track getEventId(event)) {
+                    <div class="event-dot" [class]="getEventType(event)" [title]="getEventTitle(event)"></div>
+                  }
+                  @if (day.events.length > 3) {
+                    <span class="more-events">+{{ day.events.length - 3 }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Selected Day Events -->
+        @if (selectedDay()) {
+          <div class="selected-day-panel">
+            <div class="panel-header">
+              <h4>{{ formatSelectedDate(selectedDay()!.date) }}</h4>
+              <button class="close-panel" (click)="selectedDay.set(null)">×</button>
+            </div>
+            <div class="panel-events">
+              @for (event of selectedDay()!.events; track getEventId(event)) {
+                <div class="event-item" [class]="getEventType(event)">
+                  <div class="event-time">{{ formatEventTime(event) }}</div>
+                  <div class="event-details">
+                    <h5>{{ getEventTitle(event) }}</h5>
+                    <span class="event-type-badge">{{ getEventTypeLabel(event) }}</span>
+                    @if (getEventLocation(event)) {
+                      <span class="event-location"><app-icon name="map-pin" [size]="12" /> {{ getEventLocation(event) }}</span>
+                    }
+                  </div>
+                  <div class="event-actions">
+                    <button class="action-btn" title="Ver" (click)="viewEvent(event)"><app-icon name="eye" [size]="16" /></button>
+                    <button class="action-btn" title="Editar" (click)="editEvent(event)"><app-icon name="edit" [size]="16" /></button>
+                  </div>
+                </div>
+              } @empty {
+                <p class="no-events">No hay eventos este día</p>
+              }
+            </div>
+          </div>
+        }
+      } @else {
+        <!-- List View -->
+        <div class="events-list">
+          @for (group of groupedEvents(); track group.month) {
+            <div class="month-group">
+              <h4 class="month-title">{{ group.month }}</h4>
+              <div class="month-events">
+                @for (event of group.events; track getEventId(event)) {
+                  <div class="list-event" [class]="getEventType(event)">
+                    <div class="event-date-col">
+                      <span class="event-day">{{ getDay(event) }}</span>
+                      <span class="event-weekday">{{ getWeekday(event) }}</span>
+                    </div>
+                    <div class="event-info">
+                      <h5>{{ getEventTitle(event) }}</h5>
+                      <div class="event-meta">
+                        <span class="event-type-badge">{{ getEventTypeLabel(event) }}</span>
+                        @if (getEventLocation(event)) {
+                          <span><app-icon name="map-pin" [size]="14" /> {{ getEventLocation(event) }}</span>
+                        }
+                        <span><app-icon name="clock" [size]="14" /> {{ formatEventTime(event) }}</span>
+                      </div>
+                    </div>
+                    <div class="event-status">
+                      <span class="status-badge" [class]="getEventStatus(event)">
+                        {{ getEventStatusLabel(event) }}
+                      </span>
+                    </div>
+                    <div class="event-actions">
+                      <button class="action-btn" (click)="viewEvent(event)"><app-icon name="eye" [size]="16" /></button>
+                      <button class="action-btn" (click)="editEvent(event)"><app-icon name="edit" [size]="16" /></button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-state">
+              <span class="empty-icon"><app-icon name="calendar" [size]="48" /></span>
+              <h3>No hay eventos próximos</h3>
+              <p>Programa nuevos eventos para la red</p>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Quick Add Modal -->
+      @if (showModal()) {
+        <div class="modal-overlay" (click)="closeModal()">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Nuevo Evento Rápido</h3>
+              <button class="close-btn" (click)="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+              <form (ngSubmit)="saveEvent()">
+                <div class="form-group">
+                  <label>Tipo de evento *</label>
+                  <select [(ngModel)]="formData.type" name="type" required>
+                    <option value="general">Evento general</option>
+                    <option value="asamblea">Asamblea</option>
+                    <option value="foro">Evento del foro</option>
+                  </select>
+                  <p class="hint">Para asambleas y eventos del foro, use sus secciones respectivas para más opciones.</p>
+                </div>
+
+                <div class="form-group">
+                  <label>Título *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.title"
+                    name="title"
+                    required
+                  >
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Fecha inicio *</label>
+                    <input
+                      type="datetime-local"
+                      [(ngModel)]="formData.startDate"
+                      name="startDate"
+                      required
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label>Fecha fin</label>
+                    <input
+                      type="datetime-local"
+                      [(ngModel)]="formData.endDate"
+                      name="endDate"
+                    >
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Ubicación</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.location"
+                    name="location"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Descripción</label>
+                  <textarea
+                    [(ngModel)]="formData.description"
+                    name="description"
+                    rows="2"
+                  ></textarea>
+                </div>
+
+                <div class="checkbox-group">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                    Visible en calendario público
+                  </label>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                  <button type="submit" class="btn-primary">Crear evento</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      }
+    </div>

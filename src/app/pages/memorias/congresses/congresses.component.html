@@ -1,0 +1,398 @@
+<div class="congresses-management">
+      <div class="page-header">
+        <div class="header-content">
+          <h2>Historial de Congresos</h2>
+          <p>Archivo histórico de congresos y eventos académicos GIRD-ACC.</p>
+        </div>
+        <button class="btn-primary" (click)="openModal()">
+          <app-icon name="plus" [size]="18" /> Registrar Congreso
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="congress" /></span>
+          <div class="stat-info">
+            <h4>{{ congresses().length }}</h4>
+            <p>Congresos</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="globe" /></span>
+          <div class="stat-info">
+            <h4>{{ internationalCongresses() }}</h4>
+            <p>Internacionales</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="users" /></span>
+          <div class="stat-info">
+            <h4>{{ totalParticipants() | number }}</h4>
+            <p>Participantes</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon"><app-icon name="file-text" /></span>
+          <div class="stat-info">
+            <h4>{{ totalPresentations() | number }}</h4>
+            <p>Ponencias</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <span class="search-icon"><app-icon name="search" [size]="18" /></span>
+          <input
+            type="text"
+            placeholder="Buscar congreso..."
+            [(ngModel)]="searchQuery"
+            (input)="applyFilters()"
+          >
+        </div>
+        <div class="filter-group">
+          <select [(ngModel)]="yearFilter" (change)="applyFilters()">
+            <option value="all">Todos los años</option>
+            @for (year of availableYears(); track year) {
+              <option [value]="year">{{ year }}</option>
+            }
+          </select>
+          <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+            <option value="all">Todos los tipos</option>
+            <option value="congreso">Congreso</option>
+            <option value="simposio">Simposio</option>
+            <option value="encuentro">Encuentro</option>
+            <option value="jornada">Jornada</option>
+            <option value="foro">Foro</option>
+          </select>
+          <select [(ngModel)]="scopeFilter" (change)="applyFilters()">
+            <option value="all">Todo ámbito</option>
+            <option value="nacional">Nacional</option>
+            <option value="internacional">Internacional</option>
+            <option value="regional">Regional</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Congresses Grid -->
+      <div class="congresses-grid">
+        @for (congress of filteredCongresses(); track congress.id) {
+          <div class="congress-card">
+            <div class="congress-banner">
+              @if (congress.bannerUrl) {
+                <img [src]="congress.bannerUrl" [alt]="congress.name">
+              } @else {
+                <div class="banner-placeholder">
+                  <span class="edition">{{ congress.edition }}°</span>
+                  <span class="type">{{ getTypeLabel(congress.type) }}</span>
+                </div>
+              }
+              <div class="congress-badges">
+                <span class="scope-badge" [class]="congress.scope">{{ getScopeLabel(congress.scope) }}</span>
+                <span class="year-badge">{{ congress.year }}</span>
+              </div>
+            </div>
+
+            <div class="congress-content">
+              <h4>{{ congress.name }}</h4>
+
+              @if (congress.theme) {
+                <p class="congress-theme">"{{ congress.theme }}"</p>
+              }
+
+              <div class="congress-details">
+                <div class="detail-item">
+                  <span class="detail-icon"><app-icon name="calendar" [size]="16" /></span>
+                  <span>{{ formatDateRange(congress.startDate, congress.endDate) }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-icon"><app-icon name="map-pin" [size]="16" /></span>
+                  <span>{{ congress.location }}</span>
+                </div>
+                @if (congress.hostUniversity) {
+                  <div class="detail-item">
+                    <span class="detail-icon"><app-icon name="university" [size]="16" /></span>
+                    <span>{{ congress.hostUniversity }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="congress-stats">
+                @if (congress.participantsCount) {
+                  <div class="stat-item">
+                    <span class="stat-value">{{ congress.participantsCount }}</span>
+                    <span class="stat-label">participantes</span>
+                  </div>
+                }
+                @if (congress.presentationsCount) {
+                  <div class="stat-item">
+                    <span class="stat-value">{{ congress.presentationsCount }}</span>
+                    <span class="stat-label">ponencias</span>
+                  </div>
+                }
+                @if (congress.speakersCount) {
+                  <div class="stat-item">
+                    <span class="stat-value">{{ congress.speakersCount }}</span>
+                    <span class="stat-label">ponentes</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="congress-footer">
+              <div class="footer-left">
+                <div class="visibility-toggle">
+                  <label class="switch">
+                    <input
+                      type="checkbox"
+                      [checked]="congress.isPublic"
+                      (change)="toggleVisibility(congress)"
+                    >
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="resource-links">
+                  @if (congress.proceedingsUrl) {
+                    <a [href]="congress.proceedingsUrl" target="_blank" title="Actas"><app-icon name="file-text" [size]="16" /></a>
+                  }
+                  @if (congress.photosAlbumUrl) {
+                    <a [href]="congress.photosAlbumUrl" target="_blank" title="Fotos"><app-icon name="camera" [size]="16" /></a>
+                  }
+                  @if (congress.videosPlaylistUrl) {
+                    <a [href]="congress.videosPlaylistUrl" target="_blank" title="Videos"><app-icon name="multimedia" [size]="16" /></a>
+                  }
+                </div>
+              </div>
+              <div class="action-buttons">
+                <button class="action-btn" title="Editar" (click)="editCongress(congress)"><app-icon name="edit" [size]="16" /></button>
+                <button class="action-btn delete" title="Eliminar" (click)="deleteCongress(congress)"><app-icon name="trash" [size]="16" /></button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="empty-icon"><app-icon name="congress" [size]="48" /></span>
+            <h3>No hay congresos registrados</h3>
+            <p>Registra el primer congreso histórico</p>
+            <button class="btn-primary" (click)="openModal()">
+              Registrar congreso
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Modal -->
+      @if (showModal()) {
+        <div class="modal-overlay" (click)="closeModal()">
+          <div class="modal modal-lg" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ editingCongress() ? 'Editar congreso' : 'Nuevo congreso' }}</h3>
+              <button class="close-btn" (click)="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+              <form (ngSubmit)="saveCongress()">
+                <div class="form-section">
+                  <h4>Información General</h4>
+                  <div class="form-group">
+                    <label>Nombre del evento *</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.name"
+                      name="name"
+                      required
+                    >
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Tipo *</label>
+                      <select [(ngModel)]="formData.type" name="type" required>
+                        <option value="congreso">Congreso</option>
+                        <option value="simposio">Simposio</option>
+                        <option value="encuentro">Encuentro</option>
+                        <option value="jornada">Jornada</option>
+                        <option value="foro">Foro</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>N° de edición *</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="formData.edition"
+                        name="edition"
+                        min="1"
+                        required
+                      >
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Año *</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="formData.year"
+                        name="year"
+                        min="2000"
+                        required
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Ámbito *</label>
+                      <select [(ngModel)]="formData.scope" name="scope" required>
+                        <option value="nacional">Nacional</option>
+                        <option value="internacional">Internacional</option>
+                        <option value="regional">Regional</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Tema central</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.theme"
+                      name="theme"
+                    >
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Lugar y Fechas</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Fecha de inicio *</label>
+                      <input
+                        type="date"
+                        [(ngModel)]="formData.startDate"
+                        name="startDate"
+                        required
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Fecha de fin *</label>
+                      <input
+                        type="date"
+                        [(ngModel)]="formData.endDate"
+                        name="endDate"
+                        required
+                      >
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Lugar *</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="formData.location"
+                        name="location"
+                        required
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Universidad anfitriona</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="formData.hostUniversity"
+                        name="hostUniversity"
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Estadísticas</h4>
+                  <div class="form-row form-row-3">
+                    <div class="form-group">
+                      <label>Participantes</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="formData.participantsCount"
+                        name="participantsCount"
+                        min="0"
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Ponencias</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="formData.presentationsCount"
+                        name="presentationsCount"
+                        min="0"
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>Ponentes</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="formData.speakersCount"
+                        name="speakersCount"
+                        min="0"
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Recursos y Media</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>URL de banner</label>
+                      <input
+                        type="url"
+                        [(ngModel)]="formData.bannerUrl"
+                        name="bannerUrl"
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>URL de actas</label>
+                      <input
+                        type="url"
+                        [(ngModel)]="formData.proceedingsUrl"
+                        name="proceedingsUrl"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>URL de álbum fotográfico</label>
+                      <input
+                        type="url"
+                        [(ngModel)]="formData.photosAlbumUrl"
+                        name="photosAlbumUrl"
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>URL de playlist de videos</label>
+                      <input
+                        type="url"
+                        [(ngModel)]="formData.videosPlaylistUrl"
+                        name="videosPlaylistUrl"
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="checkbox-group">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic">
+                    Disponible en web pública
+                  </label>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+                  <button type="submit" class="btn-primary">
+                    {{ editingCongress() ? 'Guardar cambios' : 'Registrar congreso' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      }
+    </div>

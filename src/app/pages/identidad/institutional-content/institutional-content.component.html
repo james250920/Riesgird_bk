@@ -1,0 +1,103 @@
+<div class="institutional-content">
+      <div class="page-header">
+        <h2>Contenido Institucional</h2>
+        <p>Gestiona la misión, visión, objetivos y lineamientos de la red.</p>
+      </div>
+
+      <div class="content-tabs">
+        @for (content of institutionalService.contents(); track content.id) {
+          <button
+            class="tab-btn"
+            [class.active]="selectedTab() === content.type"
+            (click)="selectTab(content.type)"
+          >
+            {{ content.title }}
+          </button>
+        }
+      </div>
+
+      <div class="content-editor">
+        @if (currentContent()) {
+          <div class="editor-header">
+            <div class="editor-info">
+              <h3>{{ currentContent()?.title }}</h3>
+              <span class="last-updated">
+                Última actualización: {{ formatDate(currentContent()?.lastUpdated) }}
+              </span>
+            </div>
+            <div class="editor-actions">
+              <label class="visibility-toggle">
+                <input
+                  type="checkbox"
+                  [checked]="currentContent()?.isPublic"
+                  (change)="toggleVisibility()"
+                >
+                <span>Visible en web pública</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="editor-toolbar">
+            <button class="toolbar-btn" title="Negrita" (click)="formatText('bold')">
+              <strong>B</strong>
+            </button>
+            <button class="toolbar-btn" title="Cursiva" (click)="formatText('italic')">
+              <em>I</em>
+            </button>
+            <button class="toolbar-btn" title="Subrayado" (click)="formatText('underline')">
+              <u>U</u>
+            </button>
+            <span class="toolbar-separator"></span>
+            <button class="toolbar-btn" title="Lista" (click)="formatText('insertUnorderedList')">
+              • Lista
+            </button>
+            <button class="toolbar-btn" title="Lista numerada" (click)="formatText('insertOrderedList')">
+              1. Lista
+            </button>
+            <span class="toolbar-separator"></span>
+            <button class="toolbar-btn" title="Encabezado" (click)="formatText('formatBlock', 'h3')">
+              H3
+            </button>
+            <button class="toolbar-btn" title="Párrafo" (click)="formatText('formatBlock', 'p')">
+              P
+            </button>
+          </div>
+
+          <div
+            class="editor-content"
+            contenteditable="true"
+            [innerHTML]="editableContent()"
+            (input)="onContentChange($event)"
+            (blur)="saveContent()"
+          ></div>
+
+          <div class="editor-footer">
+            <div class="char-count">
+              {{ getTextLength() }} caracteres
+            </div>
+            <div class="footer-actions">
+              <button class="btn-secondary" (click)="previewContent()">
+                👁️ Vista previa
+              </button>
+              <button class="btn-primary" (click)="saveContent()">
+                💾 Guardar cambios
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Preview Modal -->
+      @if (showPreview()) {
+        <div class="modal-overlay" (click)="showPreview.set(false)">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Vista Previa - {{ currentContent()?.title }}</h3>
+              <button class="close-btn" (click)="showPreview.set(false)">×</button>
+            </div>
+            <div class="modal-body preview-content" [innerHTML]="currentContent()?.content">
+            </div>
+          </div>
+        </div>
+      }
+    </div>

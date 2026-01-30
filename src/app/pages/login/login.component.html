@@ -1,0 +1,99 @@
+<div class="login-page">
+  <div class="login-container">
+    <div class="login-left">
+      <div class="branding">
+        <img src="assets/logo-riesgird.png" alt="RIESGIRD-ACC" class="logo">
+        <h1>RIESGIRD-ACC PERÚ</h1>
+        <p>Red Interuniversitaria de Estudios, Investigación y Gestión Integral del Riesgo de Desastres y Adaptación al Cambio Climático</p>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <span class="icon"><app-icon name="university" [size]="24" /></span>
+          <span>Gestión de Universidades</span>
+        </div>
+        <div class="feature">
+          <span class="icon"><app-icon name="requirement" [size]="24" /></span>
+          <span>Control de Membresías</span>
+        </div>
+        <div class="feature">
+          <span class="icon"><app-icon name="chart" [size]="24" /></span>
+          <span>Reportes y Estadísticas</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-right">
+      <div class="login-form-container">
+        <h2>Iniciar Sesión</h2>
+        <p class="subtitle">Accede al panel de administración</p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label for="email">Correo electrónico</label>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              placeholder="usuario@riesgird.edu.pe"
+              [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+            >
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+              <span class="error-message">Ingrese un correo válido</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <div class="password-input">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                id="password"
+                formControlName="password"
+                placeholder="••••••••"
+                [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+              >
+              <button type="button" class="toggle-password" (click)="showPassword = !showPassword">
+                <app-icon [name]="showPassword ? 'eye-off' : 'eye'" [size]="20" />
+              </button>
+            </div>
+            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+              <span class="error-message">La contraseña es requerida</span>
+            }
+          </div>
+
+          <div class="form-options">
+            <label class="remember-me">
+              <input type="checkbox" formControlName="rememberMe">
+              <span>Recordarme</span>
+            </label>
+            <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert alert-error">
+              {{ errorMessage }}
+            </div>
+          }
+
+          <button
+            type="submit"
+            class="submit-btn"
+            [disabled]="loginForm.invalid || isLoading"
+          >
+            @if (isLoading) {
+              <span class="spinner"></span>
+              Ingresando...
+            } @else {
+              Ingresar
+            }
+          </button>
+        </form>
+
+        <div class="demo-credentials">
+          <p>Credenciales de demostración:</p>
+          <code>admin&#64;riesgird.edu.pe</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
