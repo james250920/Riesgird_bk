@@ -15,7 +15,10 @@
         <div class="user-avatar">
           {{
             (
-              (((user.fullName?.trim() ?? '').split(' ')[0]?.[0] ?? '') +((user.fullName?.trim() ?? '').split(' ')[1]?.[0] ?? ((user.fullName?.trim() ?? '').split(' ')[0]?.[1] ?? '')))
+              (
+                (user.fullName.trim().split(' ').at(0)?.[0] ?? '') +
+                (user.fullName.trim().split(' ').at(1)?.[0] ?? (user.fullName.trim().split(' ').at(0)?.[1] ?? ''))
+              )
             ).toUpperCase()
           }}
         </div>
