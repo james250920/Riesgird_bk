@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../services';
 import { IconComponent } from '../../shared/icons/icons.component';
 
@@ -12,6 +12,15 @@ interface NavItem {
   permission?: string;
 }
 
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  read: boolean;
+  timestamp: Date;
+}
+
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
@@ -21,12 +30,44 @@ interface NavItem {
 })
 export class AdminLayoutComponent {
   authService = inject(AuthService);
+  router = inject(Router);
 
   sidebarCollapsed = signal(false);
   mobileMenuOpen = signal(false);
   pageTitle = signal('Dashboard');
   breadcrumbs = signal<string[]>([]);
   showPublicContent = signal(false);
+
+  // Notificaciones
+  showNotificationsPanel = signal(false);
+  notifications = signal<Notification[]>([
+    {
+      id: '1',
+      title: 'Nueva solicitud de membresía',
+      message: 'Universidad Nacional de Piura ha enviado una solicitud',
+      type: 'info',
+      read: false,
+      timestamp: new Date(Date.now() - 1000 * 60 * 30) // hace 30 minutos
+    },
+    {
+      id: '2',
+      title: 'Asamblea programada',
+      message: 'Recordatorio: Asamblea General mañana a las 10:00 AM',
+      type: 'warning',
+      read: false,
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2) // hace 2 horas
+    },
+    {
+      id: '3',
+      title: 'Documento aprobado',
+      message: 'El informe anual 2025 ha sido aprobado',
+      type: 'success',
+      read: true,
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) // hace 1 día
+    }
+  ]);
+
+  unreadCount = () => this.notifications().filter(n => !n.read).length;
 
   navItems: NavItem[] = [
     { label: 'Dashboard', icon: 'home', route: '/admin/dashboard' },
@@ -119,6 +160,51 @@ export class AdminLayoutComponent {
 
   togglePublicContent(): void {
     this.showPublicContent.update(v => !v);
+  }
+
+  // Notificaciones
+  toggleNotifications(): void {
+    this.showNotificationsPanel.update(v => !v);
+  }
+
+  closeNotifications(): void {
+    this.showNotificationsPanel.set(false);
+  }
+
+  markAsRead(notification: Notification): void {
+    this.notifications.update(notifs =>
+      notifs.map(n => n.id === notification.id ? { ...n, read: true } : n)
+    );
+  }
+
+  markAllAsRead(): void {
+    this.notifications.update(notifs =>
+      notifs.map(n => ({ ...n, read: true }))
+    );
+  }
+
+  deleteNotification(notification: Notification): void {
+    this.notifications.update(notifs =>
+      notifs.filter(n => n.id !== notification.id)
+    );
+  }
+
+  getTimeAgo(date: Date): string {
+    const now = new Date();
+    const diffMs = now.getTime() - new Date(date).getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Ahora';
+    if (diffMins < 60) return `Hace ${diffMins} min`;
+    if (diffHours < 24) return `Hace ${diffHours} h`;
+    return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+  }
+
+  // Configuración
+  goToSettings(): void {
+    this.router.navigate(['/admin/configuracion/usuarios']);
   }
 
   getUserInitials(): string {

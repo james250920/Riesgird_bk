@@ -18,8 +18,16 @@ export class UsersComponent {
   showModal = signal(false);
   editingUser = signal<User | null>(null);
 
+  formData = {
+    fullName: '',
+    email: '',
+    role: 'viewer' as User['role'],
+    isActive: true
+  };
+
   openModal(): void {
     this.editingUser.set(null);
+    this.resetForm();
     this.showModal.set(true);
   }
 
@@ -30,6 +38,12 @@ export class UsersComponent {
 
   editUser(user: User): void {
     this.editingUser.set(user);
+    this.formData = {
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive
+    };
     this.showModal.set(true);
   }
 
@@ -41,5 +55,32 @@ export class UsersComponent {
 
   toggleUserStatus(user: User): void {
     this.authService.updateUser(user.id, { isActive: !user.isActive });
+  }
+
+  saveUser(): void {
+    if (this.editingUser()) {
+      // Actualizar usuario existente
+      this.authService.updateUser(this.editingUser()!.id, this.formData);
+    } else {
+      // Crear nuevo usuario
+      const newUser: User = {
+        id: crypto.randomUUID(),
+        ...this.formData,
+        permissions: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      this.authService.addUser(newUser);
+    }
+    this.closeModal();
+  }
+
+  resetForm(): void {
+    this.formData = {
+      fullName: '',
+      email: '',
+      role: 'viewer',
+      isActive: true
+    };
   }
 }

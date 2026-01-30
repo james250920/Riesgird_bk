@@ -22,4 +22,58 @@
       </div>
     }
   </div>
+
+  <!-- Modal de Configuración de Permisos -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal modal-large" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Configurar permisos: {{ selectedRole()?.name }}</h3>
+          <button class="close-btn" (click)="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="permissions-config">
+            <p class="help-text">Selecciona los módulos y acciones permitidas para este rol:</p>
+
+            @for (module of modulePermissions; track module.module) {
+              <div class="module-permission">
+                <div class="module-header">
+                  <label class="module-toggle">
+                    <input
+                      type="checkbox"
+                      [checked]="module.enabled"
+                      (change)="toggleModule(module)"
+                    >
+                    <span class="module-name">{{ module.label }}</span>
+                  </label>
+                </div>
+
+                @if (module.enabled) {
+                  <div class="actions-grid">
+                    @for (action of module.actions; track action.key) {
+                      <label class="action-checkbox">
+                        <input
+                          type="checkbox"
+                          [checked]="isActionSelected(module, action.key)"
+                          (change)="toggleAction(module, action.key)"
+                        >
+                        <span>{{ action.label }}</span>
+                      </label>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="button" class="btn-primary" (click)="savePermissions()">
+              Guardar permisos
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </div>
