@@ -1,0 +1,37 @@
+<div class="certificates-management">
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Certificados de Membresía</h2>
+      <p>Gestiona y descarga certificados de adscripción a la red.</p>
+    </div>
+    <button class="btn-primary">
+      <app-icon name="plus" [size]="18" /> Generar Certificado
+    </button>
+  </div>
+
+  <div class="certificates-list">
+    @for (cert of certificates; track cert.id) {
+      <div class="certificate-card">
+        <div class="cert-icon">
+          <app-icon name="award" [size]="48" />
+        </div>
+        <div class="cert-info">
+          <h4>{{ cert.university }}</h4>
+          <p class="cert-type">{{ cert.type }}</p>
+          <p class="cert-date">Emitido: {{ cert.issueDate | date: 'dd/MM/yyyy' }}</p>
+        </div>
+        <div class="cert-actions">
+          <span class="status-badge" [class]="cert.status">{{ cert.status }}</span>
+          <div class="action-buttons">
+            <button class="action-btn" title="Ver certificado">
+              <app-icon name="eye" [size]="18" />
+            </button>
+            <button class="action-btn" title="Descargar PDF">
+              <app-icon name="download" [size]="18" />
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

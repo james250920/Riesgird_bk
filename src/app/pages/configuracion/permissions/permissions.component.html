@@ -1,0 +1,25 @@
+<div class="permissions-management">
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Gestión de Permisos</h2>
+      <p>Configura los roles y permisos del sistema.</p>
+    </div>
+  </div>
+
+  <div class="roles-grid">
+    @for (role of roles; track role.id) {
+      <div class="role-card">
+        <div class="role-icon" [style.background]="role.color">
+          <app-icon name="shield" [size]="32" />
+        </div>
+        <div class="role-info">
+          <h4>{{ role.name }}</h4>
+          <p class="role-level">{{ role.level }}</p>
+        </div>
+        <button class="btn-edit">
+          <app-icon name="settings" [size]="18" /> Configurar
+        </button>
+      </div>
+    }
+  </div>
+</div>

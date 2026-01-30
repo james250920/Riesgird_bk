@@ -1,0 +1,31 @@
+<div class="audit-management">
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Auditoría del Sistema</h2>
+      <p>Registro de acciones y cambios en el sistema.</p>
+    </div>
+  </div>
+
+  <div class="audit-list">
+    @for (log of authService.auditLogs(); track log.id) {
+      <div class="audit-entry">
+        <div class="audit-icon">
+          <app-icon name="activity" [size]="20" />
+        </div>
+        <div class="audit-info">
+          <h4>{{ log.action }}</h4>
+          <p>Usuario: {{ log.userName }}</p>
+          <p class="audit-date">{{ log.timestamp | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+        <div class="audit-module">
+          <span class="module-badge">{{ log.module }}</span>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <app-icon name="document" [size]="48" />
+        <p>No hay registros de auditoría</p>
+      </div>
+    }
+  </div>
+</div>

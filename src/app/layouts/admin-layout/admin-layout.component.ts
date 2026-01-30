@@ -45,7 +45,7 @@ export class AdminLayoutComponent {
       icon: 'university',
       route: '/admin/universidades',
       children: [
-        { label: 'Directorio', icon: 'folder', route: '/admin/universidades/directorio' },
+        { label: 'Directorio', icon: 'folder', route: '/admin/universidades/lista' },
         { label: 'Autoridades', icon: 'users', route: '/admin/universidades/autoridades' },
         { label: 'Equipos Técnicos', icon: 'team', route: '/admin/universidades/equipos' },
         { label: 'Repositorio', icon: 'folder', route: '/admin/universidades/repositorio' }
@@ -68,7 +68,7 @@ export class AdminLayoutComponent {
       route: '/admin/gobernanza',
       children: [
         { label: 'Asambleas', icon: 'assembly', route: '/admin/gobernanza/asambleas' },
-        { label: 'Foro Interuniversitario', icon: 'forum', route: '/admin/gobernanza/foro' },
+        { label: 'Eventos', icon: 'forum', route: '/admin/gobernanza/eventos' },
         { label: 'Calendario', icon: 'calendar', route: '/admin/gobernanza/calendario' }
       ]
     },

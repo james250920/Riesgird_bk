@@ -82,6 +82,10 @@ export const routes: Routes = [
           {
             path: 'solicitudes',
             loadComponent: () => import('./pages/membresia/applications/applications.component').then(m => m.ApplicationsComponent)
+          },
+          {
+            path: 'certificados',
+            loadComponent: () => import('./pages/membresia/certificates/certificates.component').then(m => m.CertificatesComponent)
           }
         ]
       },
@@ -146,6 +150,26 @@ export const routes: Routes = [
           {
             path: 'multimedia',
             loadComponent: () => import('./pages/memorias/multimedia/multimedia.component').then(m => m.MultimediaComponent)
+          }
+        ]
+      },
+
+      // Módulo 7: Configuración del Sistema
+      {
+        path: 'configuracion',
+        children: [
+          { path: '', redirectTo: 'usuarios', pathMatch: 'full' },
+          {
+            path: 'usuarios',
+            loadComponent: () => import('./pages/configuracion/users/users.component').then(m => m.UsersComponent)
+          },
+          {
+            path: 'permisos',
+            loadComponent: () => import('./pages/configuracion/permissions/permissions.component').then(m => m.PermissionsComponent)
+          },
+          {
+            path: 'auditoria',
+            loadComponent: () => import('./pages/configuracion/audit/audit.component').then(m => m.AuditComponent)
           }
         ]
       }
