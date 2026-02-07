@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  panel-control-red:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: panel-control-red
+    ports:
+      - "4880:4880"
+    environment:
+      - NODE_ENV=production
+      - PORT=4880
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4880"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
