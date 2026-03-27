@@ -1,0 +1,24 @@
+.web-module { display: block; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+.header-content h2 { font-size: 1.5rem; font-weight: 700; color: #1a365d; margin-bottom: 0.5rem; }
+.header-content p { color: #718096; }
+.menu-list { display: flex; flex-direction: column; gap: .75rem; }
+.menu-item-card { background: #fff; border-radius: 10px; padding: .9rem 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+.menu-item-card h4 { margin: 0 0 .2rem; color: #1a365d; }
+.menu-item-card p { margin: 0; color: #718096; font-size: .85rem; }
+.actions { display: flex; align-items: center; gap: .6rem; }
+.checkbox-inline { display: inline-flex; align-items: center; gap: .35rem; color: #4a5568; font-size: .85rem; }
+.action-btn { width: 32px; height: 32px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f7fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.action-btn.delete { color: #c53030; }
+.empty-state { background: #fff; border-radius: 12px; padding: 1rem; color: #718096; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.modal { width: min(520px, 92vw); background: #fff; border-radius: 16px; overflow: hidden; }
+.modal-header { display:flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid #e2e8f0; }
+.close-btn { border: none; background: #f7fafc; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; }
+.modal-body { padding: 1.25rem; display: grid; gap: .75rem; }
+.form-group label { display: block; font-size: .85rem; color: #4a5568; margin-bottom: .35rem; }
+.form-group input { width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: .6rem .75rem; }
+.form-actions { display: flex; gap: .75rem; margin-top: .5rem; }
+.btn-primary, .btn-secondary { border: none; border-radius: 8px; padding: .7rem 1rem; cursor: pointer; font-weight: 500; }
+.btn-primary { background: #1a365d; color: #fff; display: inline-flex; align-items:center; gap:.45rem; }
+.btn-secondary { background: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }

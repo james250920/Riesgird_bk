@@ -1,0 +1,11 @@
+.web-module { display: block; }
+.page-header { margin-bottom: 1rem; }
+.header-content h2 { font-size: 1.5rem; font-weight: 700; color: #1a365d; margin-bottom: 0.5rem; }
+.header-content p { color: #718096; }
+.success-banner { margin-bottom: 1rem; background: #c6f6d5; color: #276749; border: 1px solid #9ae6b4; border-radius: 8px; padding: .7rem .9rem; font-size: .875rem; }
+.settings-card { background: #fff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); display: grid; gap: .85rem; max-width: 760px; }
+.form-group label { display: block; font-size: .85rem; color: #4a5568; margin-bottom: .35rem; font-weight: 600; }
+.form-group input, .form-group textarea { width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: .6rem .75rem; }
+.checkbox-inline { display: inline-flex; align-items: center; gap: .35rem; color: #4a5568; font-size: .9rem; }
+.actions { margin-top: .5rem; }
+.btn-primary { border: none; border-radius: 8px; padding: .7rem 1rem; background: #1a365d; color: #fff; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: .45rem; }

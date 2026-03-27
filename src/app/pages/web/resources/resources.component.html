@@ -1,0 +1,72 @@
+<div class="web-module">
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Web - Recursos</h2>
+      <p>Gestiona documentos, enlaces, videos e imagenes del portal publico.</p>
+    </div>
+    <button class="btn-primary" (click)="openModal()">
+      <app-icon name="plus" [size]="18" /> Nuevo recurso
+    </button>
+  </div>
+
+  <div class="cards-grid">
+    @for (resource of resources(); track resource.id) {
+      <div class="resource-card">
+        <div class="resource-top">
+          <span class="type-badge">{{ resource.type }}</span>
+          <span class="visibility-badge" [class.public]="resource.isPublic">{{ resource.isPublic ? 'Publico' : 'Privado' }}</span>
+        </div>
+        <h4>{{ resource.title }}</h4>
+        <p>{{ resource.description || 'Sin descripcion' }}</p>
+        <a [href]="resource.url" target="_blank" rel="noopener">{{ resource.url }}</a>
+        <div class="actions">
+          <button class="action-btn" (click)="editResource(resource)"><app-icon name="edit" [size]="16" /></button>
+          <button class="action-btn delete" (click)="deleteResource(resource)"><app-icon name="trash" [size]="16" /></button>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">No hay recursos creados.</div>
+    }
+  </div>
+
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editingResource() ? 'Editar recurso' : 'Nuevo recurso' }}</h3>
+          <button class="close-btn" (click)="closeModal()">×</button>
+        </div>
+        <form class="modal-body" (ngSubmit)="saveResource()">
+          <div class="form-group">
+            <label>Titulo *</label>
+            <input type="text" [(ngModel)]="formData.title" name="title" required>
+          </div>
+          <div class="form-group">
+            <label>Tipo *</label>
+            <select [(ngModel)]="formData.type" name="type" required>
+              <option value="documento">Documento</option>
+              <option value="enlace">Enlace</option>
+              <option value="video">Video</option>
+              <option value="imagen">Imagen</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>URL *</label>
+            <input type="url" [(ngModel)]="formData.url" name="url" required>
+          </div>
+          <div class="form-group">
+            <label>Descripcion</label>
+            <textarea [(ngModel)]="formData.description" name="description" rows="3"></textarea>
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" [(ngModel)]="formData.isPublic" name="isPublic"> Publicar recurso
+          </label>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn-primary">{{ editingResource() ? 'Guardar' : 'Crear' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

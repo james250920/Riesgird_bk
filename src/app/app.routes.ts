@@ -175,6 +175,26 @@ export const routes: Routes = [
             loadComponent: () => import('./pages/configuracion/audit/audit.component').then(m => m.AuditComponent)
           }
         ]
+      },
+
+      // Módulo 8: Gestión Web
+      {
+        path: 'web',
+        children: [
+          { path: '', redirectTo: 'recursos', pathMatch: 'full' },
+          {
+            path: 'recursos',
+            loadComponent: () => import('./pages/web/resources/resources.component').then(m => m.ResourcesComponent)
+          },
+          {
+            path: 'menus',
+            loadComponent: () => import('./pages/web/menus/menus.component').then(m => m.MenusComponent)
+          },
+          {
+            path: 'seo',
+            loadComponent: () => import('./pages/web/site-settings/site-settings.component').then(m => m.SiteSettingsComponent)
+          }
+        ]
       }
     ]
   },

@@ -1,0 +1,44 @@
+<div class="web-module">
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Web - SEO y Configuracion</h2>
+      <p>Administra metadatos y ajustes generales del sitio web publico.</p>
+    </div>
+  </div>
+
+  @if (saveMessage()) {
+    <div class="success-banner">{{ saveMessage() }}</div>
+  }
+
+  <div class="settings-card">
+    <div class="form-group">
+      <label>Titulo del sitio</label>
+      <input type="text" [(ngModel)]="formData.siteTitle" name="siteTitle">
+    </div>
+
+    <div class="form-group">
+      <label>Meta descripcion</label>
+      <textarea [(ngModel)]="formData.metaDescription" name="metaDescription" rows="3"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Palabras clave</label>
+      <input type="text" [(ngModel)]="formData.keywords" name="keywords" placeholder="keyword1, keyword2, keyword3">
+    </div>
+
+    <div class="form-group">
+      <label>URL imagen Open Graph</label>
+      <input type="url" [(ngModel)]="formData.ogImageUrl" name="ogImageUrl">
+    </div>
+
+    <label class="checkbox-inline">
+      <input type="checkbox" [(ngModel)]="formData.maintenanceMode" name="maintenanceMode"> Modo mantenimiento
+    </label>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="save()">
+        <app-icon name="save" [size]="16" /> Guardar cambios
+      </button>
+    </div>
+  </div>
+</div>

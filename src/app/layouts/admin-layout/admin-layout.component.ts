@@ -143,6 +143,16 @@ export class AdminLayoutComponent {
         { label: 'Permisos', icon: 'shield', route: '/admin/configuracion/permisos' },
         { label: 'Auditoría', icon: 'document', route: '/admin/configuracion/auditoria' }
       ]
+    },
+    {
+      label: 'Web',
+      icon: 'globe',
+      route: '/admin/web',
+      children: [
+        { label: 'Recursos', icon: 'folder', route: '/admin/web/recursos' },
+        { label: 'Menus', icon: 'menu', route: '/admin/web/menus' },
+        { label: 'SEO y Config.', icon: 'settings', route: '/admin/web/seo' }
+      ]
     }
   ];
 

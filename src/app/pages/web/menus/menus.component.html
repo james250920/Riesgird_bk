@@ -1,0 +1,62 @@
+<div class="web-module">
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Web - Menus</h2>
+      <p>Administra los enlaces de navegacion del sitio publico.</p>
+    </div>
+    <button class="btn-primary" (click)="openModal()">
+      <app-icon name="plus" [size]="18" /> Nuevo item
+    </button>
+  </div>
+
+  <div class="menu-list">
+    @for (item of menuItems(); track item.id) {
+      <div class="menu-item-card">
+        <div>
+          <h4>{{ item.order }}. {{ item.label }}</h4>
+          <p>{{ item.path }}</p>
+        </div>
+        <div class="actions">
+          <label class="checkbox-inline">
+            <input type="checkbox" [checked]="item.isVisible" (change)="toggleVisibility(item)"> Visible
+          </label>
+          <button class="action-btn delete" (click)="deleteMenuItem(item)"><app-icon name="trash" [size]="16" /></button>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">No hay items de menu.</div>
+    }
+  </div>
+
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Nuevo item de menu</h3>
+          <button class="close-btn" (click)="closeModal()">×</button>
+        </div>
+        <form class="modal-body" (ngSubmit)="saveMenuItem()">
+          <div class="form-group">
+            <label>Etiqueta *</label>
+            <input type="text" [(ngModel)]="formData.label" name="label" required>
+          </div>
+          <div class="form-group">
+            <label>Ruta *</label>
+            <input type="text" [(ngModel)]="formData.path" name="path" placeholder="/mi-ruta" required>
+          </div>
+          <div class="form-group">
+            <label>Orden</label>
+            <input type="number" [(ngModel)]="formData.order" name="order" min="1">
+          </div>
+          <label class="checkbox-inline">
+            <input type="checkbox" [(ngModel)]="formData.isVisible" name="isVisible"> Visible
+          </label>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

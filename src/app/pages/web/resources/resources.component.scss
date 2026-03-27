@@ -1,0 +1,26 @@
+.web-module { display: block; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+.header-content h2 { font-size: 1.5rem; font-weight: 700; color: #1a365d; margin-bottom: 0.5rem; }
+.header-content p { color: #718096; }
+.cards-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.resource-card { background: #fff; border-radius: 12px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); display: flex; flex-direction: column; gap: .5rem; }
+.resource-top { display: flex; justify-content: space-between; align-items: center; }
+.type-badge { padding: .2rem .45rem; border-radius: 6px; background: #edf2f7; color: #2d3748; font-size: .75rem; text-transform: capitalize; }
+.visibility-badge { padding: .2rem .45rem; border-radius: 6px; background: #fed7d7; color: #c53030; font-size: .75rem; }
+.visibility-badge.public { background: #c6f6d5; color: #276749; }
+.actions { display: flex; gap: .5rem; margin-top: .25rem; }
+.action-btn { width: 32px; height: 32px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f7fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.action-btn.delete { color: #c53030; }
+.empty-state { background: #fff; border-radius: 12px; padding: 1rem; color: #718096; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.modal { width: min(560px, 92vw); background: #fff; border-radius: 16px; overflow: hidden; }
+.modal-header { display:flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid #e2e8f0; }
+.close-btn { border: none; background: #f7fafc; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; }
+.modal-body { padding: 1.25rem; display: grid; gap: .75rem; }
+.form-group label { display: block; font-size: .85rem; color: #4a5568; margin-bottom: .35rem; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: .6rem .75rem; }
+.checkbox { display: flex; align-items: center; gap: .45rem; color: #4a5568; }
+.form-actions { display: flex; gap: .75rem; margin-top: .5rem; }
+.btn-primary, .btn-secondary { border: none; border-radius: 8px; padding: .7rem 1rem; cursor: pointer; font-weight: 500; }
+.btn-primary { background: #1a365d; color: #fff; display: inline-flex; align-items:center; gap:.45rem; }
+.btn-secondary { background: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
