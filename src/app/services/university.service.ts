@@ -1,10 +1,23 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { University, Authority, TechnicalTeamMember, UniversityReport } from '../models';
+import { ApiResponse } from '../models/api-response';
+import { environment } from '../../environments/environment';
+
+export interface UniversityApiItem {
+  id: string;
+  name: string;
+  shortName: string;
+  isActive: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class UniversityService {
+  private readonly http = inject(HttpClient);
+  private readonly universitiesApiUrl = `${environment.backendUrl}/v1/universities`;
 
   private _universities = signal<University[]>([
     {
@@ -72,6 +85,10 @@ export class UniversityService {
     });
     return grouped;
   });
+
+  getUniversitiesApi(): Observable<ApiResponse<UniversityApiItem[]>> {
+    return this.http.get<ApiResponse<UniversityApiItem[]>>(this.universitiesApiUrl);
+  }
 
   // CRUD Universidades
   getUniversityById(id: string): University | undefined {

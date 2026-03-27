@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   // Redirect root to login
@@ -13,6 +14,8 @@ export const routes: Routes = [
   // Admin panel (protected layout)
   {
     path: 'admin',
+    canActivate: [authGuard],
+    canActivateChild: [authGuard],
     loadComponent: () => import('./layouts/admin-layout/admin-layout.component').then(m => m.AdminLayoutComponent),
     children: [
       // Dashboard

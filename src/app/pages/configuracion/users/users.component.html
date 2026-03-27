@@ -9,8 +9,23 @@
     </button>
   </div>
 
+  @if (operationNotice()) {
+    <div class="operation-notice" [class.success]="operationNotice()?.type === 'success'" [class.error]="operationNotice()?.type === 'error'">
+      <span>{{ operationNotice()?.message }}</span>
+      <button type="button" class="notice-close" (click)="clearOperationNotice()">×</button>
+    </div>
+  }
+
   <div class="users-list">
-    @for (user of authService.users(); track user.id) {
+    @if (isLoadingUsers()) {
+      <div class="user-card">
+        <div class="user-info">
+          <h4>Cargando usuarios...</h4>
+        </div>
+      </div>
+    }
+
+    @for (user of users(); track user.id) {
       <div class="user-card">
         <div class="user-avatar">
           {{
@@ -41,6 +56,14 @@
           </button>
         </div>
       </div>
+    } @empty {
+      @if (!isLoadingUsers()) {
+        <div class="user-card">
+          <div class="user-info">
+            <h4>No hay usuarios para mostrar.</h4>
+          </div>
+        </div>
+      }
     }
   </div>
 
@@ -55,17 +78,6 @@
         <div class="modal-body">
           <form (ngSubmit)="saveUser()">
             <div class="form-group">
-              <label>Nombre completo *</label>
-              <input
-                type="text"
-                [(ngModel)]="formData.fullName"
-                name="fullName"
-                placeholder="Nombre completo del usuario"
-                required
-              >
-            </div>
-
-            <div class="form-group">
               <label>Correo electrónico *</label>
               <input
                 type="email"
@@ -77,15 +89,83 @@
             </div>
 
             <div class="form-group">
+              <label>Contraseña {{ editingUser() ? '' : '*' }}</label>
+              <input
+                type="password"
+                [(ngModel)]="formData.passwordHash"
+                name="passwordHash"
+                placeholder="Contraseña del usuario"
+                [required]="!editingUser()"
+              >
+            </div>
+
+            <div class="form-group">
+              <label>Nombre completo *</label>
+              <input
+                type="text"
+                [(ngModel)]="formData.fullName"
+                name="fullName"
+                placeholder="Nombre completo del usuario"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label>Foto (URL)</label>
+              <input
+                type="url"
+                [(ngModel)]="formData.photoUrl"
+                name="photoUrl"
+                placeholder="https://..."
+              >
+            </div>
+
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input
+                type="text"
+                [(ngModel)]="formData.phone"
+                name="phone"
+                placeholder="999999999"
+              >
+            </div>
+
+            <div class="form-group">
               <label>Rol *</label>
-              <select [(ngModel)]="formData.role" name="role" required>
-                <option value="super_admin">Super Administrador</option>
-                <option value="admin_red">Administrador de Red</option>
-                <option value="admin_universidad">Administrador Universidad</option>
-                <option value="editor">Editor</option>
-                <option value="viewer">Visualizador</option>
+              <select [(ngModel)]="formData.roleId" name="roleId" required>
+                @if (isLoadingCatalogs()) {
+                  <option value="">Cargando roles...</option>
+                } @else {
+                  @for (role of roles(); track role.id) {
+                    <option [value]="role.id">{{ role.name }}</option>
+                  }
+                }
               </select>
             </div>
+
+            <div class="form-group">
+              <label>Universidad</label>
+              <select [(ngModel)]="formData.universityId" name="universityId">
+                <option value="">Sin universidad</option>
+                @for (university of universities(); track university.id) {
+                  <option [value]="university.id">{{ university.shortName }} - {{ university.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Cargo</label>
+              <input
+                type="text"
+                [(ngModel)]="formData.position"
+                name="position"
+                placeholder="Cargo en la institución"
+              >
+            </div>
+
+            @if (saveError()) {
+              <div class="status-badge">{{ saveError() }}</div>
+            }
 
             <div class="checkbox-group">
               <label>
@@ -96,8 +176,11 @@
 
             <div class="form-actions">
               <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
-              <button type="submit" class="btn-primary">
-                {{ editingUser() ? 'Guardar cambios' : 'Crear usuario' }}
+              <button type="submit" class="btn-primary" [disabled]="isSaving()">
+                @if (isSaving()) {
+                  <span class="spinner"></span>
+                }
+                {{ isSaving() ? 'Guardando...' : (editingUser() ? 'Guardar cambios' : 'Crear usuario') }}
               </button>
             </div>
           </form>

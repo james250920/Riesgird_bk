@@ -7,3 +7,5 @@ export * from './governance.service';
 export * from './knowledge.service';
 export * from './memories.service';
 export * from './auth.service';
+export * from './roles.service';
+export * from './users.service';

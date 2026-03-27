@@ -97,6 +97,15 @@ export class AuthService {
     return normalized.message;
   }
 
+  hasActiveSession(): boolean {
+    if (typeof localStorage === 'undefined') {
+      return false;
+    }
+
+    const token = localStorage.getItem('auth_token');
+    return Boolean(token);
+  }
+
   // Permisos
   hasPermission(module: ModuleName, action: ActionType): boolean {
     const user = this._currentUser();

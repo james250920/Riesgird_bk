@@ -225,5 +225,7 @@ export class AdminLayoutComponent {
 
   logout(): void {
     this.authService.logout();
+    this.closeMobileMenu();
+    this.router.navigate(['/login']);
   }
 }

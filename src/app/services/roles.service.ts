@@ -11,7 +11,7 @@ import { environment } from '../../environments/environment';
 })
 export class RoleService {
 
-  private apiUrl = `${environment.backendUrl}/roles`;
+  private readonly apiUrl = `${environment.backendUrl}/v1/roles`;
 
   constructor(private http: HttpClient) {}
 
