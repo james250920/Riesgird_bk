@@ -1,10 +1,27 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { User, UserRole, Permission, AuditLog, SystemConfig, ModuleName, ActionType } from '../models';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, catchError, tap, throwError } from 'rxjs';
+import {
+  User,
+  UserRole,
+  Permission,
+  AuditLog,
+  SystemConfig,
+  ModuleName,
+  ActionType,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse
+} from '../models';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private readonly http = inject(HttpClient);
+  private readonly usersApiUrl = `${environment.backendUrl}/v1/users`;
 
   private _currentUser = signal<User | null>(null);
   private _users = signal<User[]>([
@@ -52,12 +69,32 @@ export class AuthService {
     return false;
   }
 
+  loginWithApi(payload: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.usersApiUrl}/login`, payload).pipe(
+      tap(response => this.applyAuthSession(response, 'login')),
+      catchError(error => throwError(() => this.normalizeApiError(error)))
+    );
+  }
+
+  registerWithApi(payload: RegisterRequest): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.usersApiUrl}/register`, payload).pipe(
+      tap(response => this.applyAuthSession(response, 'create')),
+      catchError(error => throwError(() => this.normalizeApiError(error)))
+    );
+  }
+
   logout(): void {
     const userId = this._currentUser()?.id;
     if (userId) {
       this.logAction('logout', 'usuarios', 'user', userId);
     }
     this._currentUser.set(null);
+    this.removeStoredToken();
+  }
+
+  getApiErrorMessage(error: unknown): string {
+    const normalized = this.normalizeApiError(error);
+    return normalized.message;
   }
 
   // Permisos
@@ -200,6 +237,80 @@ export class AuthService {
         updatedBy: this._currentUser()?.fullName || 'system'
       };
       this._systemConfigs.update(configs => [...configs, newConfig]);
+    }
+  }
+
+  private applyAuthSession(response: LoginResponse, action: string): void {
+    const userPayload = (response as any)?.data?.user ?? (response as any)?.userResponse;
+    const token = (response as any)?.data?.token ?? (response as any)?.token;
+
+    if (!userPayload || !token) {
+      throw new Error('La respuesta del servicio de autenticacion no tiene el formato esperado.');
+    }
+
+    const mappedUser = this.mapApiUserToUser(userPayload);
+    this._currentUser.set(mappedUser);
+    this.storeToken(token);
+    this.logAction(action, 'usuarios', 'user', mappedUser.id);
+  }
+
+  private mapApiUserToUser(apiUser: any): User {
+    const id = apiUser?.id ?? apiUser?.Id ?? crypto.randomUUID();
+    const roleId = apiUser?.roleId ?? apiUser?.RoleId;
+
+    return {
+      id,
+      email: apiUser?.email ?? apiUser?.Email ?? '',
+      fullName: apiUser?.fullName ?? apiUser?.FullName ?? '',
+      photoUrl: apiUser?.photoUrl ?? apiUser?.PhotoUrl,
+      phone: (apiUser?.phone ?? apiUser?.Phone)?.toString(),
+      role: this.mapRoleIdToUserRole(roleId),
+      permissions: [],
+      universityId: apiUser?.universityId ?? apiUser?.UniversityId,
+      position: apiUser?.position ?? apiUser?.Position,
+      isActive: apiUser?.isActive ?? apiUser?.IsActive ?? true,
+      lastLogin: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  private mapRoleIdToUserRole(roleId?: string): UserRole {
+    if (!roleId) return 'viewer';
+
+    const normalizedRole = roleId.toLowerCase();
+
+    if (normalizedRole.includes('super')) return 'super_admin';
+    if (normalizedRole.includes('red')) return 'admin_red';
+    if (normalizedRole.includes('universidad')) return 'admin_universidad';
+    if (normalizedRole.includes('editor')) return 'editor';
+
+    return 'viewer';
+  }
+
+  private normalizeApiError(error: unknown): Error {
+    if (error instanceof HttpErrorResponse) {
+      const backendMessage =
+        error.error?.message ||
+        error.error?.title ||
+        error.error?.detail ||
+        'No se pudo conectar con el servicio de autenticación.';
+
+      return new Error(backendMessage);
+    }
+
+    return new Error('Ocurrió un error inesperado durante la autenticación.');
+  }
+
+  private storeToken(token: string): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('auth_token', token);
+    }
+  }
+
+  private removeStoredToken(): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('auth_token');
     }
   }
 }

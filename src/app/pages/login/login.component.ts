@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services';
 import { IconComponent } from '../../shared/icons/icons.component';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,7 @@ export class LoginComponent {
   private router = inject(Router);
   private authService = inject(AuthService);
 
-  loginForm = this.fb.group({
+  loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
     rememberMe: [false]
@@ -31,19 +32,19 @@ export class LoginComponent {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.errorMessage = '';
+      const { email, password } = this.loginForm.getRawValue();
 
-      // Simular delay de autenticación
-      setTimeout(() => {
-        const { email, password } = this.loginForm.value;
-        const success = this.authService.login(email!, password!);
-
-        if (success) {
-          this.router.navigate(['/admin/dashboard']);
-        } else {
-          this.errorMessage = 'Credenciales inválidas. Intente nuevamente.';
-        }
-        this.isLoading = false;
-      }, 1000);
+      this.authService
+        .loginWithApi({ email, password })
+        .pipe(finalize(() => (this.isLoading = false)))
+        .subscribe({
+          next: () => {
+            this.router.navigate(['/admin/dashboard']);
+          },
+          error: (error: unknown) => {
+            this.errorMessage = this.authService.getApiErrorMessage(error);
+          }
+        });
     }
   }
 }
