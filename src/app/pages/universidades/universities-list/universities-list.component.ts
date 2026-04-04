@@ -1,8 +1,8 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { UniversityService } from '../../../services';
+import { AuthService, UniversityService } from '../../../services';
 import { University } from '../../../models';
 import { IconComponent } from '../../../shared/icons/icons.component';
 
@@ -15,6 +15,10 @@ import { IconComponent } from '../../../shared/icons/icons.component';
 })
 export class UniversitiesListComponent {
   universityService = inject(UniversityService);
+  authService = inject(AuthService);
+
+  feedback = signal<{ type: 'success' | 'error'; message: string } | null>(null);
+  private feedbackTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   searchQuery = '';
   statusFilter = 'all';
@@ -57,7 +61,10 @@ export class UniversitiesListComponent {
   });
 
   constructor() {
-    this.applyFilters();
+    effect(() => {
+      this.universityService.universities();
+      this.applyFilters();
+    });
   }
 
   onSearch(): void {
@@ -129,8 +136,14 @@ export class UniversitiesListComponent {
   toggleVisibility(university: University): void {
     this.universityService.updateUniversity(university.id, {
       isPublic: !university.isPublic
+    }, {
+      onSuccess: () => {
+        this.showFeedback('success', `Se actualizo la visibilidad de ${university.shortName}.`);
+      },
+      onError: message => {
+        this.showFeedback('error', message);
+      }
     });
-    this.applyFilters();
   }
 
   manageAuthorities(university: University): void {
@@ -139,12 +152,25 @@ export class UniversitiesListComponent {
 
   deleteUniversity(university: University): void {
     if (confirm(`¿Está seguro de eliminar "${university.name}"?`)) {
-      this.universityService.deleteUniversity(university.id);
-      this.applyFilters();
+      this.universityService.deleteUniversity(university.id, {
+        onSuccess: () => {
+          this.showFeedback('success', `Universidad ${university.shortName} eliminada correctamente.`);
+        },
+        onError: message => {
+          this.showFeedback('error', message);
+        }
+      });
     }
   }
 
   saveUniversity(): void {
+    const currentUserId = this.authService.currentUser()?.id;
+
+    if (!currentUserId) {
+      this.showFeedback('error', 'No hay una sesion activa. Vuelve a iniciar sesion para registrar cambios.');
+      return;
+    }
+
     if (this.editingUniversity()) {
       this.universityService.updateUniversity(this.editingUniversity()!.id, {
         name: this.formData.name,
@@ -161,7 +187,15 @@ export class UniversitiesListComponent {
         certificateNumber: this.formData.certificateNumber || undefined,
         isPublic: this.formData.isPublic,
         isActive: this.formData.isActive,
-        updatedBy: 'admin'
+        updatedBy: currentUserId || ''
+      }, {
+        onSuccess: () => {
+          this.closeModal();
+          this.showFeedback('success', 'Universidad actualizada correctamente.');
+        },
+        onError: message => {
+          this.showFeedback('error', message);
+        }
       });
     } else {
       const newUniversity: University = {
@@ -185,13 +219,40 @@ export class UniversitiesListComponent {
         isActive: this.formData.isActive,
         createdAt: new Date(),
         updatedAt: new Date(),
-        createdBy: 'admin',
-        updatedBy: 'admin'
+        createdBy: currentUserId || '',
+        updatedBy: currentUserId || ''
       };
-      this.universityService.addUniversity(newUniversity);
+      this.universityService.addUniversity(newUniversity, {
+        onSuccess: () => {
+          this.closeModal();
+          this.showFeedback('success', 'Universidad creada correctamente.');
+        },
+        onError: message => {
+          this.showFeedback('error', message);
+        }
+      });
     }
-    this.closeModal();
-    this.applyFilters();
+  }
+
+  clearFeedback(): void {
+    this.feedback.set(null);
+    if (this.feedbackTimeoutId) {
+      clearTimeout(this.feedbackTimeoutId);
+      this.feedbackTimeoutId = null;
+    }
+  }
+
+  private showFeedback(type: 'success' | 'error', message: string): void {
+    this.feedback.set({ type, message });
+
+    if (this.feedbackTimeoutId) {
+      clearTimeout(this.feedbackTimeoutId);
+    }
+
+    this.feedbackTimeoutId = setTimeout(() => {
+      this.feedback.set(null);
+      this.feedbackTimeoutId = null;
+    }, 5000);
   }
 
   closeModal(): void {

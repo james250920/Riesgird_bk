@@ -9,6 +9,13 @@
     </button>
   </div>
 
+  @if (feedback(); as notice) {
+    <div class="feedback-banner" [class.success]="notice.type === 'success'" [class.error]="notice.type === 'error'">
+      <span>{{ notice.message }}</span>
+      <button type="button" class="feedback-close" (click)="clearFeedback()">×</button>
+    </div>
+  }
+
   <!-- Search and Filters -->
   <div class="filters-bar">
     <div class="search-box">
